@@ -1,0 +1,144 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: devnexa-global-backend
+  profiles:
+    active: local-h2 # Default to H2 for easy local testing; switch to 'mysql' or 'docker' for production DBs
+
+---
+# ============================================================
+# Local In-Memory Fallback Profile (Default)
+# ============================================================
+spring:
+  config:
+    activate:
+      on-profile: local-h2
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+  datasource:
+    url: jdbc:h2:mem:devnexadb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  data:
+    redis:
+      repositories:
+        enabled: false # Disable redis repositories in H2 mock profile to avoid connection issues
+
+---
+# ============================================================
+# MySQL 8 Profile
+# Usage: java -jar app.jar --spring.profiles.active=mysql
+# ============================================================
+spring:
+  config:
+    activate:
+      on-profile: mysql
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://${MYSQLHOST:localhost}:${MYSQLPORT:3306}/${MYSQLDATABASE:devnexadb}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${MYSQLUSER:devnexa_user}
+    password: ${MYSQLPASSWORD:devnexa_password}
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+  data:
+    redis:
+      host: ${REDISHOST:localhost}
+      port: ${REDISPORT:6379}
+      password: ${REDISPASSWORD:}
+      repositories:
+        enabled: false
+
+---
+# ============================================================
+# Docker/Production Profile (Requires Postgres & Redis)
+# ============================================================
+spring:
+  config:
+    activate:
+      on-profile: docker
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:devnexadb}
+    username: ${POSTGRES_USER:devnexa_user}
+    password: ${POSTGRES_PASSWORD:devnexa_password}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+---
+# ============================================================
+# Custom Application Properties (shared across all profiles)
+# ============================================================
+app:
+  # JWT Configuration
+  jwt:
+    secret: dGhpc2lzYXZlcnlzZWN1cmVzdXBlcnNlY3JldGtleWZvcmRldm5leGFnbG9iYWxqd3R0b2tlbnNpZ25pbmc=
+    expiration-ms: 86400000        # 24 hours
+    refresh-expiration-ms: 604800000  # 7 days
+
+  # Email Configuration (Gmail SMTP via Spring Mail)
+  email:
+    from: ${EMAIL_FROM:noreply@devnexa.global}
+    enabled: ${EMAIL_ENABLED:false}  # Set to true when SMTP credentials are configured
+
+  # File Storage (local disk)
+  file:
+    storage-path: ${FILE_STORAGE_PATH:./uploads}
+
+  # Stripe Payment Gateway
+  stripe:
+    secret-key: ${STRIPE_SECRET_KEY:}
+    webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+
+  # Google Gemini AI API
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
+
+# ============================================================
+# Spring Mail — Gmail SMTP (requires EMAIL_ENABLED=true)
+# Set SPRING_MAIL_USERNAME and SPRING_MAIL_PASSWORD env vars
+# ============================================================
+spring:
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+  # Servlet multipart (for file uploads)
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 25MB
+      max-request-size: 30MB

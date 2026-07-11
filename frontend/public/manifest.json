@@ -1,0 +1,15 @@
+{
+  "name": "DevNexa Global",
+  "short_name": "DevNexa",
+  "description": "Premium digital agency for enterprise software development and AI solutions.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050816",
+  "theme_color": "#7C3AED",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/favicon.ico", "sizes": "any", "type": "image/x-icon" }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "en"
+}

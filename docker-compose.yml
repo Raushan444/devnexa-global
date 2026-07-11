@@ -1,0 +1,163 @@
+version: '3.9'
+
+# ──────────────────────────────────────────────
+# DevNexa Global — Production Docker Compose
+# ──────────────────────────────────────────────
+
+services:
+
+  # ── MySQL 8 Database ──────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: devnexa-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-devnexa_root_2026}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-devnexadb}
+      MYSQL_USER: ${MYSQL_USER:-devnexa_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-devnexa_password_2026}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/src/main/resources/schema-mysql.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - devnexa-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-devnexa_root_2026}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ── PostgreSQL 16 (Alternative/Legacy) ────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: devnexa-postgres
+    restart: unless-stopped
+    profiles: ["postgres"]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-devnexadb}
+      POSTGRES_USER: ${POSTGRES_USER:-devnexa_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devnexa_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - devnexa-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-devnexa_user}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ── Redis 7 Cache ─────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: devnexa-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:-devnexa_redis_2026} --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - devnexa-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD:-devnexa_redis_2026}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── Spring Boot Backend ───────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: devnexa-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-devnexadb}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-devnexa_user}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-devnexa_password_2026}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:-devnexa_redis_2026}
+      APP_JWT_SECRET: ${JWT_SECRET:-dGhpc2lzYXZlcnlzZWN1cmVzdXBlcnNlY3JldGtleWZvcmRldm5leGFnbG9iYWxqd3R0b2tlbnNpZ25pbmc=}
+      APP_GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      APP_STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      APP_FILE_STORAGE_PATH: /app/uploads
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME:-}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+    ports:
+      - "8080:8080"
+    volumes:
+      - uploads_data:/app/uploads
+    networks:
+      - devnexa-network
+
+  # ── Next.js Frontend ──────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: devnexa-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:8080
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    networks:
+      - devnexa-network
+
+  # ── Nginx Reverse Proxy ───────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: devnexa-nginx
+    restart: unless-stopped
+    depends_on:
+      - frontend
+      - backend
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - certbot_webroot:/var/www/certbot:ro
+    networks:
+      - devnexa-network
+
+# ──────────────────────────────────────────────
+# Volumes
+# ──────────────────────────────────────────────
+volumes:
+  mysql_data:
+    driver: local
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  uploads_data:
+    driver: local
+  certbot_webroot:
+    driver: local
+
+# ──────────────────────────────────────────────
+# Networks
+# ──────────────────────────────────────────────
+networks:
+  devnexa-network:
+    driver: bridge
