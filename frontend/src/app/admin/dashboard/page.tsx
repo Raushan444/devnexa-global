@@ -158,7 +158,7 @@ export default function AdminDashboard() {
         setErrorMsg("Failed to read administrative datasets. API response check failed.");
       }
     } catch (e) {
-      setErrorMsg("Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!");
+      setErrorMsg(`Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!`);
     } finally {
       setLoading(false);
     }

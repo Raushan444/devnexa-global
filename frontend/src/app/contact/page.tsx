@@ -55,7 +55,7 @@ export default function Contact() {
         setErrorMsg(resJson.message || "Failed to schedule meeting. Make sure the backend server is running!");
       }
     } catch (e) {
-      setErrorMsg("Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!");
+      setErrorMsg(`Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!`);
     }
   };
 

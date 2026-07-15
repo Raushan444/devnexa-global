@@ -37,7 +37,7 @@ export default function AiChatbot() {
         setMessages((prev) => [...prev, { sender: "bot", text: "Sorry, I am having trouble connecting to my brain right now." }]);
       }
     } catch (err) {
-      setMessages((prev) => [...prev, { sender: "bot", text: "Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!" }]);
+      setMessages((prev) => [...prev, { sender: "bot", text: `Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!` }]);
     } finally {
       setLoading(false);
     }

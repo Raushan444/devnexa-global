@@ -126,7 +126,7 @@ export default function ClientDashboard() {
         setErrorMsg("Failed to load dashboard data. API returned bad response.");
       }
     } catch (err) {
-      setErrorMsg("Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!");
+      setErrorMsg(`Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!`);
     } finally {
       setLoading(false);
     }
@@ -234,7 +234,7 @@ export default function ClientDashboard() {
         setProposalContent("Failed to generate proposal blueprint. Make sure the backend server is running and has access to Gemini model keys.");
       }
     } catch (e) {
-      setProposalContent("Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!");
+      setProposalContent(`Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!`);
     } finally {
       setGeneratingProposalId(null);
     }

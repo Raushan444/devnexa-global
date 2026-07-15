@@ -53,7 +53,7 @@ export default function AdminLogin() {
         setErrorMsg(data.message || "Invalid credentials! Use admin / admin123.");
       }
     } catch (err) {
-      setErrorMsg("Failed to connect to backend api. Make sure Spring Boot (${API_BASE_URL}) is running!");
+      setErrorMsg(`Failed to connect to backend api. Make sure Spring Boot (${API_BASE_URL}) is running!`);
     } finally {
       setLoading(false);
     }

@@ -32,7 +32,7 @@ export default function WebsiteAuditor() {
         setErrorMsg("Failed to scan website. Make sure the backend server is active.");
       }
     } catch (err) {
-      setErrorMsg("Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!");
+      setErrorMsg(`Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!`);
     } finally {
       setLoading(false);
     }

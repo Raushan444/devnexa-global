@@ -47,7 +47,7 @@ export default function PortalLogin() {
         setErrorMsg(data.message || "Invalid credentials! Use client@devnexa.global / client123.");
       }
     } catch (err) {
-      setErrorMsg("Failed to connect to backend api. Make sure Spring Boot (${API_BASE_URL}) is running!");
+      setErrorMsg(`Failed to connect to backend api. Make sure Spring Boot (${API_BASE_URL}) is running!`);
     } finally {
       setLoading(false);
     }
@@ -79,7 +79,7 @@ export default function PortalLogin() {
         setErrorMsg("Failed to complete social login redirect mock.");
       }
     } catch (err) {
-      setErrorMsg("Failed to connect to backend api. Make sure Spring Boot (${API_BASE_URL}) is running!");
+      setErrorMsg(`Failed to connect to backend api. Make sure Spring Boot (${API_BASE_URL}) is running!`);
     } finally {
       setLoading(false);
     }
