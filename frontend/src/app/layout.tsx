@@ -3,8 +3,6 @@ import { Space_Grotesk, Inter, Plus_Jakarta_Sans } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AiChatbot from "@/components/AiChatbot";
-import CustomCursor from "@/components/ui/CustomCursor";
-import ScrollProgress from "@/components/ui/ScrollProgress";
 import PageTransition from "@/components/ui/PageTransition";
 import "./globals.css";
 
@@ -83,8 +81,6 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-[#070B16] text-[#F8FAFC]">
-        <CustomCursor />
-        <ScrollProgress />
         <Navbar />
         <main className="flex-grow pt-[80px]">
           <PageTransition>
