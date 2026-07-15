@@ -33,31 +33,30 @@ public class FileStorageService {
     @Autowired
     private UploadedFileRepository uploadedFileRepository;
 
+    @Autowired
+    private IFileStorageService fileStorage;
+
     private Path getStorageDir() {
         return Paths.get(storagePath).toAbsolutePath().normalize();
     }
 
     public UploadedFile storeFile(MultipartFile file, User uploadedBy, Project project) throws IOException {
-        Path storageDir = getStorageDir();
-        Files.createDirectories(storageDir);
-
         String originalFilename = file.getOriginalFilename() != null ? file.getOriginalFilename() : "file";
-        String extension = "";
-        int dotIndex = originalFilename.lastIndexOf('.');
-        if (dotIndex > 0) {
-            extension = originalFilename.substring(dotIndex);
-        }
-        String storedFilename = UUID.randomUUID().toString() + extension;
+        
+        // Upload via active file storage provider
+        FileUploadResult result = fileStorage.upload(file.getBytes(), originalFilename, file.getContentType());
 
-        Path targetPath = storageDir.resolve(storedFilename);
-        Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+        // We save the URL/secure URL as the filename to support rendering in frontend directly
+        String displayUrl = result.secureUrl() != null && !result.secureUrl().isBlank() 
+                ? result.secureUrl() 
+                : result.url();
 
         UploadedFile uploadedFile = new UploadedFile(
-                storedFilename,
+                displayUrl,
                 originalFilename,
                 file.getContentType(),
                 file.getSize(),
-                storedFilename,
+                result.publicId(),
                 uploadedBy,
                 project
         );
@@ -65,6 +64,10 @@ public class FileStorageService {
     }
 
     public Resource loadFileAsResource(String filename) throws MalformedURLException {
+        // If filename is actually a full URL (e.g. Cloudinary secure url), load it as resource or throw
+        if (filename.startsWith("http://") || filename.startsWith("https://")) {
+            return new UrlResource(filename);
+        }
         Path filePath = getStorageDir().resolve(filename).normalize();
         Resource resource = new UrlResource(filePath.toUri());
         if (resource.exists()) {
@@ -80,10 +83,9 @@ public class FileStorageService {
     public void deleteFile(Long fileId) {
         uploadedFileRepository.findById(fileId).ifPresent(f -> {
             try {
-                Path filePath = getStorageDir().resolve(f.getFilename()).normalize();
-                Files.deleteIfExists(filePath);
-            } catch (IOException e) {
-                logger.warn("Could not delete file from disk: {}", e.getMessage());
+                fileStorage.delete(f.getStorageKey());
+            } catch (Exception e) {
+                logger.warn("Could not delete file from cloud storage: {}", e.getMessage());
             }
             uploadedFileRepository.delete(f);
         });

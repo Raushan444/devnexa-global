@@ -42,6 +42,9 @@ public class WebSecurityConfig {
     private RateLimitingFilter rateLimitingFilter;
 
     @Autowired
+    private TelemetryFilter telemetryFilter;
+
+    @Autowired
     private JwtAuthenticationEntryPoint unauthorizedHandler;
 
     @Autowired
@@ -121,6 +124,7 @@ public class WebSecurityConfig {
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(rateLimitingFilter, JwtAuthenticationFilter.class);
+        http.addFilterBefore(telemetryFilter, RateLimitingFilter.class);
 
         return http.build();
     }

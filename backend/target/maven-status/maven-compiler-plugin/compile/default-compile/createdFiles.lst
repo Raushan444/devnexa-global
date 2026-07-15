@@ -65,6 +65,7 @@ com\devnexa\global\modules\ai\AiService.class
 com\devnexa\global\modules\auth\JwtAuthenticationResponse.class
 com\devnexa\global\modules\portal\SupportTicket$TicketPriority.class
 com\devnexa\global\modules\admin\AuditController.class
+com\devnexa\global\modules\auth\TelemetryFilter.class
 com\devnexa\global\modules\crm\CrmController$QuoteRequestBody.class
 com\devnexa\global\modules\newsletter\NewsletterController$SubscribeRequest.class
 com\devnexa\global\modules\auth\WebSecurityConfig.class
