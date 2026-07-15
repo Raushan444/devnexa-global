@@ -98,6 +98,10 @@ app:
     expiration-ms: 86400000        # 24 hours
     refresh-expiration-ms: 604800000  # 7 days
 
+  # CORS Configuration
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,https://devnexa.global}
+
   # Email Configuration (Gmail SMTP via Spring Mail)
   email:
     from: ${EMAIL_FROM:noreply@devnexa.global}
