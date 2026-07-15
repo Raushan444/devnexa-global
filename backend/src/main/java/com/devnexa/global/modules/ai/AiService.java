@@ -32,7 +32,7 @@ public class AiService {
         }
 
         try {
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
+            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -73,17 +73,22 @@ public class AiService {
     }
 
     private String generateMockReply(String prompt) {
-        String query = prompt.toLowerCase();
+        // Strip prompt template prefix to isolate target user query
+        String userQuery = prompt;
+        if (prompt.contains("User asks: ")) {
+            userQuery = prompt.substring(prompt.indexOf("User asks: ") + 11);
+        }
+        String query = userQuery.toLowerCase();
 
-        if (query.contains("cost") || query.contains("price") || query.contains("budget")) {
+        if (query.contains("cost") || query.contains("price") || query.contains("budget") || query.contains("how much")) {
             return "Based on your project goals, a decoupled Next.js + Spring Boot application typically costs between $15,000 to $30,000 depending on integrations. This includes fully tested code, JWT security filters, PostgreSQL database seeds, and Docker files.";
         }
 
-        if (query.contains("service") || query.contains("what do you do") || query.contains("portfolio")) {
+        if (query.contains("service") || query.contains("what do you do") || query.contains("portfolio") || query.contains("capabilities")) {
             return "DevNexa Global specializes in Custom Software Engineering, Interactive Web Interfaces (Next.js 15), and Advanced AI Integrations (Gemini API LLM workflows, context search). Explore our Services page for details.";
         }
 
-        if (query.contains("stack") || query.contains("technology")) {
+        if (query.contains("stack") || query.contains("technology") || query.contains("framework")) {
             return "We build using Next.js 15 App Router, React 19, Tailwind CSS v4, Framer Motion, and GSAP on the frontend. The backend is constructed using Java 21/26, Spring Boot, Spring Security (JWT), PostgreSQL database, and Redis cache clusters.";
         }
 
