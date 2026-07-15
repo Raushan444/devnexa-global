@@ -49,6 +49,7 @@ com\devnexa\global\modules\auth\UserPrincipal.class
 com\devnexa\global\modules\file\FileUploadResult.class
 com\devnexa\global\modules\booking\BookingRequest.class
 com\devnexa\global\modules\portal\Project$ProjectStatus.class
+com\devnexa\global\modules\auth\TokenBlacklistService.class
 com\devnexa\global\modules\newsletter\NewsletterService.class
 com\devnexa\global\modules\file\FileController.class
 com\devnexa\global\modules\file\UploadedFileRepository.class

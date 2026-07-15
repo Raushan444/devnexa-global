@@ -3,8 +3,12 @@ package com.devnexa.global.modules.auth;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import com.devnexa.global.modules.admin.AuditService;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,6 +16,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class RateLimitingFilter implements Filter {
+
+    private static final Logger logger = LoggerFactory.getLogger(RateLimitingFilter.class);
+
+    @Autowired
+    private AuditService auditService;
 
     private final ConcurrentHashMap<String, RequestCounter> ipRequestMap = new ConcurrentHashMap<>();
     private static final int MAX_REQUESTS_PER_MINUTE = 100;
@@ -38,6 +47,12 @@ public class RateLimitingFilter implements Filter {
 
             RequestCounter counter = ipRequestMap.get(ip);
             if (counter != null && counter.count.get() > MAX_REQUESTS_PER_MINUTE) {
+                logger.warn("Rate limit violation for IP Address: {}. Total requests count: {}", ip, counter.count.get());
+                try {
+                    auditService.log("SYSTEM", "RATE_LIMIT_VIOLATION", "IP", ip, "IP Address " + ip + " exceeded maximum allowed request count: " + counter.count.get());
+                } catch (Exception e) {
+                    // Prevent security filter failure if db audit logging has transaction issue
+                }
                 httpResponse.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
                 httpResponse.setContentType("application/json");
                 httpResponse.getWriter().write("{\"success\":false,\"message\":\"Too many requests. Please try again in a minute.\"}");

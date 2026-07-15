@@ -47,6 +47,9 @@ public class AuthController {
     @Autowired
     private LoginAttemptService loginAttemptService;
 
+    @Autowired
+    private TokenBlacklistService blacklistService;
+
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest,
                                               HttpServletRequest httpRequest) {
@@ -198,6 +201,17 @@ public class AuthController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(new JwtAuthenticationResponse(jwt, refreshToken, user.getId(), user.getUsername(), user.getEmail(), roles));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logoutUser(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            String token = header.substring(7);
+            long remainingMs = tokenProvider.getRemainingExpirationMs(token);
+            blacklistService.blacklistToken(token, remainingMs);
+        }
+        return ResponseEntity.ok(new ApiResponse(true, "Logged out successfully. Token invalidated."));
     }
 
     private String getClientIp(HttpServletRequest request) {

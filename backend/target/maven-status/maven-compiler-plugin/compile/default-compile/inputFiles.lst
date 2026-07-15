@@ -20,6 +20,7 @@ C:\Users\royra\.gemini\antigravity\scratch\devnexa-global\backend\src\main\java\
 C:\Users\royra\.gemini\antigravity\scratch\devnexa-global\backend\src\main\java\com\devnexa\global\modules\auth\RateLimitingFilter.java
 C:\Users\royra\.gemini\antigravity\scratch\devnexa-global\backend\src\main\java\com\devnexa\global\modules\auth\Role.java
 C:\Users\royra\.gemini\antigravity\scratch\devnexa-global\backend\src\main\java\com\devnexa\global\modules\auth\SignupRequest.java
+C:\Users\royra\.gemini\antigravity\scratch\devnexa-global\backend\src\main\java\com\devnexa\global\modules\auth\TokenBlacklistService.java
 C:\Users\royra\.gemini\antigravity\scratch\devnexa-global\backend\src\main\java\com\devnexa\global\modules\auth\TokenRefreshRequest.java
 C:\Users\royra\.gemini\antigravity\scratch\devnexa-global\backend\src\main\java\com\devnexa\global\modules\auth\User.java
 C:\Users\royra\.gemini\antigravity\scratch\devnexa-global\backend\src\main\java\com\devnexa\global\modules\auth\UserPrincipal.java

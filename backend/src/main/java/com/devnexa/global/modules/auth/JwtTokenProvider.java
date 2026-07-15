@@ -5,6 +5,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -63,7 +64,14 @@ public class JwtTokenProvider {
         return Long.parseLong(claims.getSubject());
     }
 
+    @Autowired
+    private TokenBlacklistService blacklistService;
+
     public boolean validateToken(String authToken) {
+        if (blacklistService.isBlacklisted(authToken)) {
+            logger.warn("JWT token is blacklisted");
+            return false;
+        }
         try {
             Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(authToken);
             return true;
@@ -77,5 +85,18 @@ public class JwtTokenProvider {
             logger.error("JWT claims string is empty.");
         }
         return false;
+    }
+
+    public long getRemainingExpirationMs(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            return Math.max(0, claims.getExpiration().getTime() - System.currentTimeMillis());
+        } catch (Exception e) {
+            return jwtExpirationInMs; // fallback
+        }
     }
 }
