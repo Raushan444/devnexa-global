@@ -20,7 +20,9 @@ public class Lead {
 
     private String phone;
     private String company;
-    private String source; // WEBSITE, REFERRAL, SOCIAL, COLD_OUTREACH
+
+    @Enumerated(EnumType.STRING)
+    private LeadSource source;
 
     @Enumerated(EnumType.STRING)
     private LeadStatus status = LeadStatus.NEW;
@@ -42,7 +44,7 @@ public class Lead {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public Lead(String name, String email, String phone, String company, String source) {
+    public Lead(String name, String email, String phone, String company, LeadSource source) {
         this.name = name;
         this.email = email;
         this.phone = phone;
@@ -60,6 +62,10 @@ public class Lead {
         NEW, CONTACTED, QUALIFIED, PROPOSAL, WON, LOST
     }
 
+    public enum LeadSource {
+        ESTIMATOR, PLANNER, QUOTE, CONTACT, CHATBOT, WEBSITE
+    }
+
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -71,8 +77,8 @@ public class Lead {
     public void setPhone(String phone) { this.phone = phone; }
     public String getCompany() { return company; }
     public void setCompany(String company) { this.company = company; }
-    public String getSource() { return source; }
-    public void setSource(String source) { this.source = source; }
+    public LeadSource getSource() { return source; }
+    public void setSource(LeadSource source) { this.source = source; }
     public LeadStatus getStatus() { return status; }
     public void setStatus(LeadStatus status) { this.status = status; }
     public String getNotes() { return notes; }

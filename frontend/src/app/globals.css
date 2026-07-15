@@ -218,3 +218,365 @@ html {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+
+/* ===== CUSTOM CURSOR ===== */
+:root {
+  --cursor-size: 40px;
+  --cursor-dot-size: 8px;
+}
+
+.cursor-ring {
+  position: fixed;
+  width: var(--cursor-size);
+  height: var(--cursor-size);
+  border: 1.5px solid rgba(0, 229, 255, 0.6);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+  mix-blend-mode: difference;
+}
+
+.cursor-dot {
+  position: fixed;
+  width: var(--cursor-dot-size);
+  height: var(--cursor-dot-size);
+  background: #00E5FF;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s ease;
+}
+
+.cursor-ring.is-hovering {
+  width: 60px;
+  height: 60px;
+  border-color: rgba(124, 58, 237, 0.8);
+  background: rgba(124, 58, 237, 0.05);
+}
+
+/* ===== SCROLL PROGRESS BAR ===== */
+.scroll-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #00E5FF, #2563EB, #7C3AED);
+  z-index: 99998;
+  transform-origin: left;
+  will-change: transform;
+}
+
+/* ===== GLOW EFFECTS ===== */
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.3), 0 0 60px rgba(0, 229, 255, 0.1);
+}
+.glow-purple {
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.3), 0 0 60px rgba(124, 58, 237, 0.1);
+}
+.glow-blue {
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.3), 0 0 60px rgba(37, 99, 235, 0.1);
+}
+
+/* ===== MAGNETIC BUTTON ===== */
+.btn-magnetic {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+.btn-magnetic::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255,255,255,0.15) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.btn-magnetic:hover::after {
+  opacity: 1;
+}
+
+/* ===== RIPPLE EFFECT ===== */
+@keyframes ripple {
+  to { transform: scale(4); opacity: 0; }
+}
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+}
+.ripple-effect .ripple-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+  pointer-events: none;
+}
+
+/* ===== SKELETON LOADER ===== */
+@keyframes skeletonShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite;
+  border-radius: 8px;
+}
+html.light .skeleton {
+  background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.09) 50%, rgba(0,0,0,0.04) 75%);
+  background-size: 200% 100%;
+}
+
+/* ===== STEP WIZARD PROGRESS ===== */
+.wizard-step-active {
+  background: linear-gradient(135deg, #7C3AED, #2563EB);
+  border-color: #2563EB;
+  color: white;
+}
+.wizard-step-done {
+  background: linear-gradient(135deg, #00E5FF, #2563EB);
+  border-color: #00E5FF;
+}
+.wizard-step-idle {
+  background: transparent;
+  border-color: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.3);
+}
+
+/* ===== ENHANCED GLASS CARD VARIANTS ===== */
+.glass-card-glow {
+  background: var(--card-bg);
+  backdrop-filter: blur(20px) saturate(200%);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  box-shadow: 0 0 40px rgba(0, 229, 255, 0.05), inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-card-glow:hover {
+  border-color: rgba(0, 229, 255, 0.2);
+  box-shadow: 0 0 60px rgba(0, 229, 255, 0.1), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+/* ===== BOOKING CALENDAR ===== */
+.calendar-day {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.calendar-day:hover:not(.calendar-day-disabled) {
+  background: rgba(37, 99, 235, 0.2);
+  border-color: rgba(37, 99, 235, 0.5);
+}
+.calendar-day-selected {
+  background: linear-gradient(135deg, #2563EB, #7C3AED);
+  border-color: #7C3AED;
+  color: white;
+}
+.calendar-day-disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+}
+
+/* ===== TIME SLOT ===== */
+.time-slot {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.time-slot:hover:not(.time-slot-taken) {
+  border-color: rgba(0, 229, 255, 0.4);
+  background: rgba(0, 229, 255, 0.05);
+}
+.time-slot-selected {
+  border-color: #00E5FF;
+  background: rgba(0, 229, 255, 0.1);
+  color: #00E5FF;
+}
+.time-slot-taken {
+  opacity: 0.3;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+/* ===== CUSTOM CURSOR ===== */
+:root {
+  --cursor-size: 40px;
+  --cursor-dot-size: 8px;
+}
+
+.cursor-ring {
+  position: fixed;
+  width: var(--cursor-size);
+  height: var(--cursor-size);
+  border: 1.5px solid rgba(0, 229, 255, 0.6);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+  mix-blend-mode: difference;
+}
+
+.cursor-dot {
+  position: fixed;
+  width: var(--cursor-dot-size);
+  height: var(--cursor-dot-size);
+  background: #00E5FF;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s ease;
+}
+
+.cursor-ring.is-hovering {
+  width: 60px;
+  height: 60px;
+  border-color: rgba(124, 58, 237, 0.8);
+  background: rgba(124, 58, 237, 0.05);
+}
+
+/* ===== SCROLL PROGRESS BAR ===== */
+.scroll-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #00E5FF, #2563EB, #7C3AED);
+  z-index: 99998;
+  transform-origin: left;
+  will-change: transform;
+}
+
+/* ===== GLOW EFFECTS ===== */
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.3), 0 0 60px rgba(0, 229, 255, 0.1);
+}
+.glow-purple {
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.3), 0 0 60px rgba(124, 58, 237, 0.1);
+}
+.glow-blue {
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.3), 0 0 60px rgba(37, 99, 235, 0.1);
+}
+
+/* ===== MAGNETIC BUTTON ===== */
+.btn-magnetic {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+.btn-magnetic::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255,255,255,0.15) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.btn-magnetic:hover::after {
+  opacity: 1;
+}
+
+/* ===== RIPPLE EFFECT ===== */
+@keyframes ripple {
+  to { transform: scale(4); opacity: 0; }
+}
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+}
+.ripple-effect .ripple-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+  pointer-events: none;
+}
+
+/* ===== SKELETON LOADER ===== */
+@keyframes skeletonShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite;
+  border-radius: 8px;
+}
+html.light .skeleton {
+  background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.09) 50%, rgba(0,0,0,0.04) 75%);
+  background-size: 200% 100%;
+}
+
+/* ===== STEP WIZARD PROGRESS ===== */
+.wizard-step-active {
+  background: linear-gradient(135deg, #7C3AED, #2563EB);
+  border-color: #2563EB;
+  color: white;
+}
+.wizard-step-done {
+  background: linear-gradient(135deg, #00E5FF, #2563EB);
+  border-color: #00E5FF;
+}
+.wizard-step-idle {
+  background: transparent;
+  border-color: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.3);
+}
+
+/* ===== ENHANCED GLASS CARD VARIANTS ===== */
+.glass-card-glow {
+  background: var(--card-bg);
+  backdrop-filter: blur(20px) saturate(200%);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  box-shadow: 0 0 40px rgba(0, 229, 255, 0.05), inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-card-glow:hover {
+  border-color: rgba(0, 229, 255, 0.2);
+  box-shadow: 0 0 60px rgba(0, 229, 255, 0.1), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+/* ===== BOOKING CALENDAR ===== */
+.calendar-day {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.calendar-day:hover:not(.calendar-day-disabled) {
+  background: rgba(37, 99, 235, 0.2);
+  border-color: rgba(37, 99, 235, 0.5);
+}
+.calendar-day-selected {
+  background: linear-gradient(135deg, #2563EB, #7C3AED);
+  border-color: #7C3AED;
+  color: white;
+}
+.calendar-day-disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+}
+
+/* ===== TIME SLOT ===== */
+.time-slot {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.time-slot:hover:not(.time-slot-taken) {
+  border-color: rgba(0, 229, 255, 0.4);
+  background: rgba(0, 229, 255, 0.05);
+}
+.time-slot-selected {
+  border-color: #00E5FF;
+  background: rgba(0, 229, 255, 0.1);
+  color: #00E5FF;
+}
+.time-slot-taken {
+  opacity: 0.3;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}

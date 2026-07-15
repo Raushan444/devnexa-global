@@ -107,9 +107,10 @@ app:
     from: ${EMAIL_FROM:noreply@devnexa.global}
     enabled: ${EMAIL_ENABLED:false}  # Set to true when SMTP credentials are configured
 
-  # File Storage (local disk)
+  # File Storage (local disk or cloudinary)
   file:
     storage-path: ${FILE_STORAGE_PATH:./uploads}
+    provider: ${FILE_STORAGE_PROVIDER:local}
 
   # Stripe Payment Gateway
   stripe:

@@ -48,10 +48,10 @@ export default function Navbar() {
 
   const navLinks = [
     { name: "Services", href: "/services" },
-    { name: "Cost Estimator", href: "/estimator" },
-    { name: "SEO Auditor", href: "/auditor" },
+    { name: "Estimator", href: "/estimator" },
+    { name: "Planner", href: "/planner" },
+    { name: "Book Call", href: "/booking" },
     { name: "Blog", href: "/blog" },
-    { name: "Contact", href: "/contact" },
   ];
 
   return (
@@ -100,13 +100,13 @@ export default function Navbar() {
           </button>
 
           <Link
-            href="/contact"
+            href="/quote"
             className="relative px-5 py-2.5 rounded-full font-sans text-xs font-bold text-white overflow-hidden group shadow-lg hover:shadow-cyan-500/10 transition-shadow"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-[#7C3AED] via-[#2563EB] to-[#00E5FF] transition-transform duration-300 group-hover:scale-105" />
             <div className="absolute inset-0.5 bg-[#050816] rounded-full group-hover:opacity-0 transition-opacity duration-300" />
             <span className="relative flex items-center gap-1.5 z-10 text-[#00E5FF] group-hover:text-white transition-colors">
-              Get Started
+              Get a Quote
               <ArrowRight className="w-3.5 h-3.5" />
             </span>
           </Link>
@@ -147,11 +147,11 @@ export default function Navbar() {
             ))}
             <hr className="border-white/5 my-1" />
             <Link
-              href="/contact"
+              href="/quote"
               onClick={() => setIsOpen(false)}
               className="flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-gradient-to-r from-[#7C3AED] via-[#2563EB] to-[#00E5FF] font-sans font-bold text-white text-xs"
             >
-              Get Started
+              Get a Quote
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

@@ -90,6 +90,13 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
+                // Booking public endpoints
+                .requestMatchers("/api/public/booking/**").permitAll()
+                // Newsletter public endpoints
+                .requestMatchers("/api/public/newsletter/**").permitAll()
+                // CRM public endpoints (project planner, quote request)
+                .requestMatchers("/api/public/crm/project-planner").permitAll()
+                .requestMatchers("/api/public/crm/quote-request").permitAll()
                 // Public APIs (e.g. public blogs, services, portfolio, contact submission)
                 .requestMatchers("/api/public/**").permitAll()
                 // Stripe webhook — must be public (no JWT from Stripe)
