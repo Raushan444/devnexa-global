@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { ExternalLink, GitBranch, Clock, DollarSign } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -9,6 +10,7 @@ const projects = [
   {
     title: "FinTrack Pro",
     category: "Web App",
+    slug: "fintrack-pro",
     description: "Enterprise-grade financial tracking dashboard with real-time analytics, Stripe invoicing, and AI-powered expense categorization.",
     tech: ["Next.js", "Spring Boot", "PostgreSQL", "Stripe", "Redis"],
     duration: "8 weeks",
@@ -20,6 +22,7 @@ const projects = [
   {
     title: "MediConnect",
     category: "Web App",
+    slug: "mediconnect",
     description: "HIPAA-compliant healthcare patient portal with appointment scheduling, telemedicine integration, and EHR data pipelines.",
     tech: ["React", "Java", "MySQL", "Docker", "WebSocket"],
     duration: "12 weeks",
@@ -31,6 +34,7 @@ const projects = [
   {
     title: "ShopNova",
     category: "E-Commerce",
+    slug: "shopnova",
     description: "High-performance e-commerce platform with AI-powered product recommendations, multi-vendor support, and Razorpay integration.",
     tech: ["Next.js", "Node.js", "MongoDB", "Razorpay", "Redis"],
     duration: "10 weeks",
@@ -42,6 +46,7 @@ const projects = [
   {
     title: "NeuralAssist",
     category: "AI/ML",
+    slug: "neuralassist",
     description: "Enterprise AI assistant platform integrating GPT-4 and Gemini for automated document analysis, code review, and business insights.",
     tech: ["Python", "FastAPI", "Gemini API", "Next.js", "PostgreSQL"],
     duration: "6 weeks",
@@ -53,6 +58,7 @@ const projects = [
   {
     title: "DeliverFlow",
     category: "Mobile",
+    slug: "deliverflow",
     description: "Real-time logistics tracking app with driver management, route optimization, and live push notifications for 50k+ daily orders.",
     tech: ["React Native", "Spring Boot", "PostgreSQL", "Google Maps", "FCM"],
     duration: "14 weeks",
@@ -64,6 +70,7 @@ const projects = [
   {
     title: "DataBridge API",
     category: "API",
+    slug: "databridge-api",
     description: "High-throughput REST API gateway handling 2M+ daily requests with custom rate limiting, caching, and schema validation.",
     tech: ["Spring Boot", "Redis", "Docker", "Nginx", "Prometheus"],
     duration: "5 weeks",
@@ -124,20 +131,24 @@ export default function PortfolioSection() {
                 className="group rounded-3xl border border-white/5 bg-white/[0.02] overflow-hidden hover:border-white/10 transition-all duration-500 hover:-translate-y-1"
               >
                 {/* Gradient header */}
-                <div className={`h-32 bg-gradient-to-r ${project.gradient} opacity-60 group-hover:opacity-80 transition-opacity duration-500 flex items-center justify-center`}>
-                  <span className="text-white/30 text-5xl font-black select-none">{project.category[0]}</span>
-                </div>
+                <Link href={`/portfolio/${project.slug}`}>
+                  <div className={`h-32 bg-gradient-to-r ${project.gradient} opacity-60 group-hover:opacity-80 transition-opacity duration-500 flex items-center justify-center cursor-pointer`}>
+                    <span className="text-white/30 text-5xl font-black select-none">{project.category[0]}</span>
+                  </div>
+                </Link>
 
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h3 className="text-lg font-bold text-white">{project.title}</h3>
+                      <Link href={`/portfolio/${project.slug}`}>
+                        <h3 className="text-lg font-bold text-white hover:text-[#00E5FF] transition-colors cursor-pointer">{project.title}</h3>
+                      </Link>
                       <span className="text-xs text-[#00E5FF] font-medium">{project.category}</span>
                     </div>
                     <div className="flex gap-2">
-                      <a href={project.live} className="p-2 rounded-lg border border-white/5 hover:border-[#00E5FF]/30 hover:text-[#00E5FF] text-slate-400 transition-all">
+                      <Link href={`/portfolio/${project.slug}`} className="p-2 rounded-lg border border-white/5 hover:border-[#00E5FF]/30 hover:text-[#00E5FF] text-slate-400 transition-all">
                         <ExternalLink size={14} />
-                      </a>
+                      </Link>
                       <a href={project.github} className="p-2 rounded-lg border border-white/5 hover:border-white/20 text-slate-400 hover:text-white transition-all">
                         <GitBranch size={14} />
                       </a>
