@@ -11,6 +11,8 @@ import com.devnexa.global.modules.portal.SupportTicket;
 import com.devnexa.global.modules.portal.SupportTicketRepository;
 import com.devnexa.global.modules.portal.TicketMessage;
 import com.devnexa.global.modules.portal.TicketMessageRepository;
+import com.devnexa.global.modules.portal.Milestone;
+import com.devnexa.global.modules.portal.MilestoneRepository;
 import com.devnexa.global.modules.auth.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,11 +42,31 @@ public class PortalController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private MilestoneRepository milestoneRepository;
+
     // 1. Projects
     @GetMapping("/projects")
     public ResponseEntity<List<Project>> getClientProjects(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         List<Project> projects = projectRepository.findByClientId(userPrincipal.getId());
         return ResponseEntity.ok(projects);
+    }
+
+    @GetMapping("/projects/{projectId}/milestones")
+    public ResponseEntity<?> getProjectMilestones(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long projectId) {
+        
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        if (!project.getClient().getId().equals(userPrincipal.getId()) &&
+                userPrincipal.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            return new ResponseEntity<>(new ApiResponse(false, "Unauthorized access!"), HttpStatus.FORBIDDEN);
+        }
+
+        List<Milestone> milestones = milestoneRepository.findByProjectIdOrderByDisplayOrderAsc(projectId);
+        return ResponseEntity.ok(milestones);
     }
 
     // 2. Invoices
