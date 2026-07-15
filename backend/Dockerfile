@@ -42,6 +42,5 @@ ENTRYPOINT ["java", \
   "-XX:+UseG1GC", \
   "-XX:+HeapDumpOnOutOfMemoryError", \
   "-Djava.security.egd=file:/dev/./urandom", \
-  "-jar", "app.jar", \
-  "--spring.profiles.active=mysql"]
+  "-jar", "app.jar"]
 

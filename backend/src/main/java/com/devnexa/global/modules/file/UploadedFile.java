@@ -3,6 +3,7 @@ package com.devnexa.global.modules.file;
 import com.devnexa.global.modules.auth.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import com.devnexa.global.modules.portal.Project;
 
 @Entity
 @Table(name = "uploaded_files")

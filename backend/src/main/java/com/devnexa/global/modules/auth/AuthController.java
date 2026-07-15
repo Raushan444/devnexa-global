@@ -1,7 +1,6 @@
 package com.devnexa.global.modules.auth;
 
 import com.devnexa.global.modules.public_shared.ApiResponse;
-import com.devnexa.global.dto.*;
 import com.devnexa.global.modules.auth.Role;
 import com.devnexa.global.modules.auth.User;
 import com.devnexa.global.modules.auth.UserRepository;
