@@ -1,4 +1,5 @@
 "use client";
+import { API_BASE_URL } from "@/config/api";
 
 import React, { useState } from "react";
 import { MessageSquare, X, Send, Bot, RefreshCw } from "lucide-react";
@@ -21,7 +22,7 @@ export default function AiChatbot() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8080/api/public/ai/chat", {
+      const response = await fetch(`${API_BASE_URL}/api/public/ai/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -36,7 +37,7 @@ export default function AiChatbot() {
         setMessages((prev) => [...prev, { sender: "bot", text: "Sorry, I am having trouble connecting to my brain right now." }]);
       }
     } catch (err) {
-      setMessages((prev) => [...prev, { sender: "bot", text: "Failed to connect to backend server. Make sure Spring Boot (localhost:8080) is running!" }]);
+      setMessages((prev) => [...prev, { sender: "bot", text: "Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!" }]);
     } finally {
       setLoading(false);
     }

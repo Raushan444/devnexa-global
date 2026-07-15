@@ -1,4 +1,5 @@
 "use client";
+import { API_BASE_URL } from "@/config/api";
 
 import React, { useState } from "react";
 import { Sparkles, Globe, ShieldAlert, CheckCircle, RefreshCw } from "lucide-react";
@@ -18,7 +19,7 @@ export default function WebsiteAuditor() {
     setReport(null);
 
     try {
-      const response = await fetch("http://localhost:8080/api/public/ai/audit", {
+      const response = await fetch(`${API_BASE_URL}/api/public/ai/audit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url })
@@ -31,7 +32,7 @@ export default function WebsiteAuditor() {
         setErrorMsg("Failed to scan website. Make sure the backend server is active.");
       }
     } catch (err) {
-      setErrorMsg("Failed to connect to backend server. Make sure Spring Boot (localhost:8080) is running!");
+      setErrorMsg("Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!");
     } finally {
       setLoading(false);
     }

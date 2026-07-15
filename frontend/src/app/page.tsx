@@ -1,4 +1,5 @@
 "use client";
+import { API_BASE_URL } from "@/config/api";
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -136,7 +137,7 @@ export default function Home() {
   const onSubmit = async (data: ContactFormData) => {
     setFormErrorMsg("");
     try {
-      const response = await fetch("http://localhost:8080/api/public/appointment", {
+      const response = await fetch(`${API_BASE_URL}/api/public/appointment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)

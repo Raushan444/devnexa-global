@@ -1,4 +1,5 @@
 "use client";
+import { API_BASE_URL } from "@/config/api";
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -28,7 +29,7 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8080/api/auth/signin", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/signin`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -52,7 +53,7 @@ export default function AdminLogin() {
         setErrorMsg(data.message || "Invalid credentials! Use admin / admin123.");
       }
     } catch (err) {
-      setErrorMsg("Failed to connect to backend api. Make sure Spring Boot (localhost:8080) is running!");
+      setErrorMsg("Failed to connect to backend api. Make sure Spring Boot (${API_BASE_URL}) is running!");
     } finally {
       setLoading(false);
     }

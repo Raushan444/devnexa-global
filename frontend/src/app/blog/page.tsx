@@ -1,4 +1,5 @@
 "use client";
+import { API_BASE_URL } from "@/config/api";
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -19,7 +20,7 @@ export default function BlogIndex() {
 
   const fetchBlogs = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/public/blogs");
+      const response = await fetch(`${API_BASE_URL}/api/public/blogs`);
       if (response.ok) {
         const data = await response.json();
         if (data && data.length > 0) {

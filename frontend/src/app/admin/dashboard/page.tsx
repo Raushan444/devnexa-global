@@ -1,4 +1,5 @@
 "use client";
+import { API_BASE_URL } from "@/config/api";
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -128,14 +129,14 @@ export default function AdminDashboard() {
 
       // Fetch admin databases
       const [resAnal, resAppt, resBlog, resUser] = await Promise.all([
-        fetch("http://localhost:8080/api/admin/analytics", { headers }),
-        fetch("http://localhost:8080/api/admin/appointments", { headers }),
-        fetch("http://localhost:8080/api/admin/blogs", { headers }),
-        fetch("http://localhost:8080/api/admin/users", { headers })
+        fetch(`${API_BASE_URL}/api/admin/analytics`, { headers }),
+        fetch(`${API_BASE_URL}/api/admin/appointments`, { headers }),
+        fetch(`${API_BASE_URL}/api/admin/blogs`, { headers }),
+        fetch(`${API_BASE_URL}/api/admin/users`, { headers })
       ]);
 
       // Fetch audit logs (non-blocking)
-      fetch("http://localhost:8080/api/admin/audit-logs", { headers })
+      fetch(`${API_BASE_URL}/api/admin/audit-logs`, { headers })
         .then(r => r.ok ? r.json() : [])
         .then(data => setAuditLogs(data))
         .catch(() => {});
@@ -157,7 +158,7 @@ export default function AdminDashboard() {
         setErrorMsg("Failed to read administrative datasets. API response check failed.");
       }
     } catch (e) {
-      setErrorMsg("Failed to connect to backend server. Make sure Spring Boot (localhost:8080) is running!");
+      setErrorMsg("Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!");
     } finally {
       setLoading(false);
     }
@@ -168,7 +169,7 @@ export default function AdminDashboard() {
     if (!token) return;
 
     try {
-      const response = await fetch(`http://localhost:8080/api/admin/appointments/${id}/status`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/appointments/${id}/status`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -193,7 +194,7 @@ export default function AdminDashboard() {
     if (!confirm("Are you sure you want to delete this blog post?")) return;
 
     try {
-      const response = await fetch(`http://localhost:8080/api/admin/blogs/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/blogs/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -212,7 +213,7 @@ export default function AdminDashboard() {
     if (!token) return;
 
     try {
-      const response = await fetch("http://localhost:8080/api/admin/blogs", {
+      const response = await fetch(`${API_BASE_URL}/api/admin/blogs`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

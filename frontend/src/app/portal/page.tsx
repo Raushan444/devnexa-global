@@ -1,4 +1,5 @@
 "use client";
+import { API_BASE_URL } from "@/config/api";
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -25,7 +26,7 @@ export default function PortalLogin() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8080/api/auth/signin", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/signin`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -46,7 +47,7 @@ export default function PortalLogin() {
         setErrorMsg(data.message || "Invalid credentials! Use client@devnexa.global / client123.");
       }
     } catch (err) {
-      setErrorMsg("Failed to connect to backend api. Make sure Spring Boot (localhost:8080) is running!");
+      setErrorMsg("Failed to connect to backend api. Make sure Spring Boot (${API_BASE_URL}) is running!");
     } finally {
       setLoading(false);
     }
@@ -56,7 +57,7 @@ export default function PortalLogin() {
     setErrorMsg("");
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:8080/api/auth/social-login", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/social-login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -78,7 +79,7 @@ export default function PortalLogin() {
         setErrorMsg("Failed to complete social login redirect mock.");
       }
     } catch (err) {
-      setErrorMsg("Failed to connect to backend api. Make sure Spring Boot (localhost:8080) is running!");
+      setErrorMsg("Failed to connect to backend api. Make sure Spring Boot (${API_BASE_URL}) is running!");
     } finally {
       setLoading(false);
     }

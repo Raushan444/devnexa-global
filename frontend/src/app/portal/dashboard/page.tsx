@@ -1,4 +1,5 @@
 "use client";
+import { API_BASE_URL } from "@/config/api";
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -94,9 +95,9 @@ export default function ClientDashboard() {
 
       // Parallel fetches
       const [resProj, resInv, resTick] = await Promise.all([
-        fetch("http://localhost:8080/api/portal/projects", { headers }),
-        fetch("http://localhost:8080/api/portal/invoices", { headers }),
-        fetch("http://localhost:8080/api/portal/tickets", { headers })
+        fetch(`${API_BASE_URL}/api/portal/projects`, { headers }),
+        fetch(`${API_BASE_URL}/api/portal/invoices`, { headers }),
+        fetch(`${API_BASE_URL}/api/portal/tickets`, { headers })
       ]);
 
       if (resProj.status === 401 || resInv.status === 401 || resTick.status === 401 ||
@@ -125,7 +126,7 @@ export default function ClientDashboard() {
         setErrorMsg("Failed to load dashboard data. API returned bad response.");
       }
     } catch (err) {
-      setErrorMsg("Failed to connect to backend server. Make sure Spring Boot (localhost:8080) is running!");
+      setErrorMsg("Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!");
     } finally {
       setLoading(false);
     }
@@ -133,7 +134,7 @@ export default function ClientDashboard() {
 
   const fetchTicketMessages = async (token: string, ticketId: number) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/portal/tickets/${ticketId}/messages`, {
+      const response = await fetch(`${API_BASE_URL}/api/portal/tickets/${ticketId}/messages`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.ok) {
@@ -153,7 +154,7 @@ export default function ClientDashboard() {
     if (!token) return;
 
     try {
-      const response = await fetch(`http://localhost:8080/api/portal/tickets/${selectedTicketId}/messages`, {
+      const response = await fetch(`${API_BASE_URL}/api/portal/tickets/${selectedTicketId}/messages`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -180,7 +181,7 @@ export default function ClientDashboard() {
     if (!token) return;
 
     try {
-      const response = await fetch("http://localhost:8080/api/portal/tickets", {
+      const response = await fetch(`${API_BASE_URL}/api/portal/tickets`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -217,7 +218,7 @@ export default function ClientDashboard() {
     setProposalProjectTitle(projectTitle);
 
     try {
-      const response = await fetch("http://localhost:8080/api/portal/ai/proposal", {
+      const response = await fetch(`${API_BASE_URL}/api/portal/ai/proposal`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -233,7 +234,7 @@ export default function ClientDashboard() {
         setProposalContent("Failed to generate proposal blueprint. Make sure the backend server is running and has access to Gemini model keys.");
       }
     } catch (e) {
-      setProposalContent("Failed to connect to backend server. Make sure Spring Boot (localhost:8080) is running!");
+      setProposalContent("Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!");
     } finally {
       setGeneratingProposalId(null);
     }

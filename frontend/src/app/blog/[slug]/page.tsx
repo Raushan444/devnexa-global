@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { API_BASE_URL } from "@/config/api";
 import { mockBlogs, BlogPost } from "@/data/blogs";
 import { ArrowLeft, Clock, Calendar, Sparkles } from "lucide-react";
 
@@ -14,7 +15,7 @@ export default async function BlogDetails({ params }: PageProps) {
   let blog: BlogPost | null = null;
 
   try {
-    const response = await fetch(`http://localhost:8080/api/public/blogs/${slug}`, {
+    const response = await fetch(`${API_BASE_URL}/api/public/blogs/${slug}`, {
       next: { revalidate: 60 }
     });
     if (response.ok) {

@@ -1,4 +1,5 @@
 "use client";
+import { API_BASE_URL } from "@/config/api";
 
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -38,7 +39,7 @@ export default function Contact() {
   const onSubmit = async (data: ContactFormData) => {
     setErrorMsg("");
     try {
-      const response = await fetch("http://localhost:8080/api/public/appointment", {
+      const response = await fetch(`${API_BASE_URL}/api/public/appointment`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -54,7 +55,7 @@ export default function Contact() {
         setErrorMsg(resJson.message || "Failed to schedule meeting. Make sure the backend server is running!");
       }
     } catch (e) {
-      setErrorMsg("Failed to connect to backend server. Make sure Spring Boot (localhost:8080) is running!");
+      setErrorMsg("Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!");
     }
   };
 

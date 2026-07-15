@@ -1,4 +1,5 @@
 "use client";
+import { API_BASE_URL } from "@/config/api";
 
 import React, { useState } from "react";
 import { Cpu, DollarSign, Clock, ListChecks, RefreshCw, Sparkles, ArrowRight } from "lucide-react";
@@ -20,7 +21,7 @@ export default function CostEstimator() {
     setEstimation("");
 
     try {
-      const response = await fetch("http://localhost:8080/api/public/ai/estimate", {
+      const response = await fetch(`${API_BASE_URL}/api/public/ai/estimate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ serviceType, complexity, details })
@@ -33,7 +34,7 @@ export default function CostEstimator() {
         setErrorMsg("Failed to generate cost breakdown. Make sure Spring Boot backend is active.");
       }
     } catch (err) {
-      setErrorMsg("Failed to connect to backend server. Make sure Spring Boot (localhost:8080) is running!");
+      setErrorMsg("Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!");
     } finally {
       setLoading(false);
     }
