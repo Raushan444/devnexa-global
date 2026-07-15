@@ -52,23 +52,6 @@ public class PortalController {
         return ResponseEntity.ok(projects);
     }
 
-    @GetMapping("/projects/{projectId}/milestones")
-    public ResponseEntity<?> getProjectMilestones(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long projectId) {
-        
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
-
-        if (!project.getClient().getId().equals(userPrincipal.getId()) &&
-                userPrincipal.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-            return new ResponseEntity<>(new ApiResponse(false, "Unauthorized access!"), HttpStatus.FORBIDDEN);
-        }
-
-        List<Milestone> milestones = milestoneRepository.findByProjectIdOrderByDisplayOrderAsc(projectId);
-        return ResponseEntity.ok(milestones);
-    }
-
     // 2. Invoices
     @GetMapping("/invoices")
     public ResponseEntity<List<Invoice>> getClientInvoices(@AuthenticationPrincipal UserPrincipal userPrincipal) {
