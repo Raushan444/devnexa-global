@@ -30,68 +30,254 @@ export default function InvoiceSection({ invoices, onRefresh }: InvoiceSectionPr
       <html>
         <head>
           <title>Invoice - ${invoice.invoiceNumber}</title>
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
           <style>
-            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; padding: 40px; }
-            .header { display: flex; justify-content: space-between; border-bottom: 2px solid #eee; padding-bottom: 20px; }
-            .title { font-size: 28px; font-weight: bold; color: #1E293B; }
-            .meta { font-size: 12px; text-align: right; line-height: 1.6; }
-            .billto { margin-top: 30px; line-height: 1.6; font-size: 14px; }
-            .table { width: 100%; border-collapse: collapse; margin-top: 40px; }
-            .table th { background: #F8FAFC; border-bottom: 2px solid #E2E8F0; text-align: left; padding: 12px; font-size: 12px; }
-            .table td { border-bottom: 1px solid #E2E8F0; padding: 12px; font-size: 14px; }
-            .totals { text-align: right; margin-top: 30px; font-size: 14px; line-height: 2; }
-            .totals strong { font-size: 18px; color: #2563EB; }
-            .footer { margin-top: 60px; font-size: 11px; color: #94A3B8; border-top: 1px solid #eee; padding-top: 20px; text-align: center; }
+            body { 
+              font-family: 'Plus Jakarta Sans', sans-serif; 
+              color: #1E293B; 
+              padding: 50px; 
+              background-color: #FFFFFF;
+              line-height: 1.5;
+            }
+            .invoice-card {
+              max-width: 800px;
+              margin: 0 auto;
+              border: 1px solid #E2E8F0;
+              border-radius: 20px;
+              overflow: hidden;
+              box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            }
+            .header-bar {
+              background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+              padding: 40px;
+              color: #FFFFFF;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            }
+            .brand-name {
+              font-family: 'Outfit', sans-serif;
+              font-size: 26px;
+              font-weight: 900;
+              letter-spacing: 0.1em;
+              color: #00E5FF;
+            }
+            .brand-sub {
+              font-size: 11px;
+              color: #94A3B8;
+              margin-top: 3px;
+              letter-spacing: 0.05em;
+            }
+            .invoice-label {
+              font-family: 'Outfit', sans-serif;
+              font-size: 32px;
+              font-weight: 700;
+              text-align: right;
+              letter-spacing: -0.02em;
+            }
+            .content-pane {
+              padding: 40px;
+            }
+            .meta-grid {
+              display: grid;
+              grid-template-cols: 1fr 1fr;
+              gap: 40px;
+              margin-bottom: 40px;
+            }
+            .party-details h4 {
+              font-family: 'Outfit', sans-serif;
+              font-size: 11px;
+              color: #64748B;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              margin-bottom: 8px;
+            }
+            .party-details p {
+              font-size: 13px;
+              color: #334155;
+              margin: 0;
+              line-height: 1.6;
+            }
+            .table { 
+              width: 100%; 
+              border-collapse: collapse; 
+              margin-top: 20px; 
+            }
+            .table th { 
+              background: #F8FAFC; 
+              border-bottom: 2px solid #E2E8F0; 
+              text-align: left; 
+              padding: 14px; 
+              font-family: 'Outfit', sans-serif;
+              font-size: 11px; 
+              font-weight: 600;
+              color: #475569;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+            .table td { 
+              border-bottom: 1px solid #F1F5F9; 
+              padding: 16px 14px; 
+              font-size: 13px; 
+              color: #334155;
+            }
+            .totals-section {
+              display: flex;
+              justify-content: flex-end;
+              margin-top: 40px;
+            }
+            .totals-box {
+              width: 300px;
+              border-top: 2px solid #E2E8F0;
+              padding-top: 20px;
+            }
+            .totals-row {
+              display: flex;
+              justify-content: space-between;
+              font-size: 13px;
+              color: #64748B;
+              margin-bottom: 8px;
+            }
+            .totals-row.grand-total {
+              font-family: 'Outfit', sans-serif;
+              font-size: 18px;
+              font-weight: 700;
+              color: #0F172A;
+              border-top: 1px solid #E2E8F0;
+              padding-top: 12px;
+              margin-top: 12px;
+            }
+            .totals-row.grand-total span {
+              color: #2563EB;
+            }
+            .footer-bar {
+              background-color: #F8FAFC;
+              border-top: 1px solid #E2E8F0;
+              padding: 30px 40px;
+              text-align: center;
+              font-size: 11px;
+              color: #64748B;
+              line-height: 1.6;
+            }
+            .status-badge {
+              display: inline-block;
+              font-family: 'Outfit', sans-serif;
+              font-size: 10px;
+              font-weight: 700;
+              letter-spacing: 0.05em;
+              text-transform: uppercase;
+              padding: 4px 10px;
+              border-radius: 6px;
+              margin-top: 10px;
+            }
+            .status-badge.paid {
+              background-color: #DCFCE7;
+              color: #15803D;
+              border: 1px solid #BBF7D0;
+            }
+            .status-badge.unpaid {
+              background-color: #FEF3C7;
+              color: #B45309;
+              border: 1px solid #FDE68A;
+            }
           </style>
         </head>
         <body>
-          <div class="header">
-            <div>
-              <div class="title">DEVNEXA GLOBAL</div>
-              <div style="font-size:12px;color:#64748B;margin-top:5px;">Premium Software Engineering & AI Solutions</div>
+          <div class="invoice-card">
+            <div class="header-bar">
+              <div>
+                <div class="brand-name">DEVNEXA GLOBAL</div>
+                <div class="brand-sub">ENTERPRISE SOFTWARE SOLUTIONS</div>
+              </div>
+              <div>
+                <div class="invoice-label">INVOICE</div>
+                <div style="font-size: 11px; color: #94A3B8; text-align: right; margin-top: 4px;">
+                  Code: ${invoice.invoiceNumber}
+                </div>
+              </div>
             </div>
-            <div class="meta">
-              <strong>Invoice Code:</strong> ${invoice.invoiceNumber}<br/>
-              <strong>Date Issued:</strong> ${invoice.issueDate}<br/>
-              <strong>Due Date:</strong> ${invoice.dueDate}
+
+            <div class="content-pane">
+              <div class="meta-grid">
+                <div class="party-details">
+                  <h4>Sender</h4>
+                  <p>
+                    <strong>DevNexa Global Ltd.</strong><br/>
+                    Noida Regional Office (Sector 62)<br/>
+                    Delhi NCR, India<br/>
+                    Email: contact@devnexa.global
+                  </p>
+                </div>
+                <div class="party-details" style="text-align: right;">
+                  <h4>Billing & Timing</h4>
+                  <p>
+                    <strong>Date Issued:</strong> ${invoice.issueDate}<br/>
+                    <strong>Due Date:</strong> ${invoice.dueDate}<br/>
+                    <span class="status-badge ${invoice.status === "PAID" ? "paid" : "unpaid"}">
+                      Status: ${invoice.status}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              <div class="meta-grid" style="border-top: 1px solid #F1F5F9; padding-top: 30px;">
+                <div class="party-details">
+                  <h4>Bill To</h4>
+                  <p>
+                    <strong>DevNexa Partner Client Account</strong><br/>
+                    Corporate Registration Hub<br/>
+                    India Workspace Registry<br/>
+                    GST Registration: 09AAACD9981K1Z2
+                  </p>
+                </div>
+              </div>
+
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Description</th>
+                    <th style="text-align: center;">Qty</th>
+                    <th style="text-align: right;">Rate</th>
+                    <th style="text-align: right;">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>Enterprise Software Implementation</strong><br/>
+                      <span style="font-size: 11px; color: #64748B;">Milestone Release Delivery and Server Layout Deployments</span>
+                    </td>
+                    <td style="text-align: center;">1</td>
+                    <td style="text-align: right;">$${invoice.amount.toLocaleString()}</td>
+                    <td style="text-align: right;">$${invoice.amount.toLocaleString()}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="totals-section">
+                <div class="totals-box">
+                  <div class="totals-row">
+                    <span>Subtotal</span>
+                    <span>$${invoice.amount.toLocaleString()}</span>
+                  </div>
+                  <div class="totals-row">
+                    <span>GST (Integrated 18%)</span>
+                    <span>$${(invoice.amount * 0.18).toLocaleString()}</span>
+                  </div>
+                  <div class="totals-row grand-total">
+                    <span>Total Amount</span>
+                    <span>$${(invoice.amount * 1.18).toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div class="billto">
-            <strong>BILL TO:</strong><br/>
-            DevNexa Partner Client Account<br/>
-            India Workspace Registry<br/>
-            GST Registration: 09AAACD9981K1Z2
-          </div>
-
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Description</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Enterprise Software Implementation - Milestone Release</td>
-                <td>1</td>
-                <td>$${invoice.amount.toLocaleString()}</td>
-                <td>$${invoice.amount.toLocaleString()}</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div class="totals">
-            Subtotal: $${invoice.amount.toLocaleString()}<br/>
-            GST Integrated (18%): $${(invoice.amount * 0.18).toLocaleString()}<br/>
-            <strong>Total Amount: $${(invoice.amount * 1.18).toLocaleString()}</strong>
-          </div>
-
-          <div class="footer">
-            Thank you for choosing DevNexa Global. For billing inquiries, email contact@devnexa.global.<br/>
-            Terms: Payment due within 15 days of issue.
+            <div class="footer-bar">
+              Thank you for partnering with DevNexa Global. For transactional issues, reach out to contact@devnexa.global.<br/>
+              <strong>Terms:</strong> Payment is strictly due within 15 days from invoice issuance date.
+            </div>
           </div>
           <script>window.print();</script>
         </body>

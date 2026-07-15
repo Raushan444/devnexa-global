@@ -100,9 +100,32 @@ public class CrmController {
         return ResponseEntity.ok(saved);
     }
 
+    /**
+     * POST /api/public/crm/audit-request
+     * Saves a lead generated from the Scoping Audit Widget.
+     */
+    @PostMapping("/api/public/crm/audit-request")
+    public ResponseEntity<Lead> createFromAuditRequest(@RequestBody AuditRequest req) {
+        Lead lead = new Lead();
+        lead.setName(req.name());
+        lead.setEmail(req.email());
+        lead.setCompany(req.company() != null ? req.company() : "N/A");
+        lead.setSource(Lead.LeadSource.WEBSITE);
+        lead.setNotes("Scoping Speed & Security Audit Request\nTarget Website URL: " + req.siteUrl() + "\nAudit Details: Requested immediate review.");
+        Lead saved = leadService.createLead(lead);
+        return ResponseEntity.ok(saved);
+    }
+
     // -------------------------------------------------------------------------
     // DTOs
     // -------------------------------------------------------------------------
+
+    public record AuditRequest(
+            String name,
+            String email,
+            String company,
+            String siteUrl
+    ) {}
 
     public record ProjectPlannerRequest(
             String name,

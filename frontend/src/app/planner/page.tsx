@@ -80,7 +80,25 @@ export default function PlannerPage() {
     phone: "",
   });
 
-  const goNext = () => { setDirection(1); setStep(s => Math.min(s + 1, TOTAL_STEPS)); };
+  const isStepValid = () => {
+    switch (step) {
+      case 1: return !!form.businessType;
+      case 2: return !!form.projectGoal.trim();
+      case 3: return form.features.length > 0;
+      case 4: return !!form.designStyle;
+      case 5: return !!form.budget;
+      case 6: return !!form.timeline;
+      case 7: return true; // Optional notes
+      case 8: return !!form.name.trim() && !!form.email.trim();
+      default: return true;
+    }
+  };
+
+  const goNext = () => {
+    if (!isStepValid()) return;
+    setDirection(1);
+    setStep(s => Math.min(s + 1, TOTAL_STEPS));
+  };
   const goBack = () => { setDirection(-1); setStep(s => Math.max(s - 1, 1)); };
 
   const toggleFeature = (f: string) => {
@@ -375,15 +393,16 @@ export default function PlannerPage() {
               {step < TOTAL_STEPS ? (
                 <button
                   onClick={goNext}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#7C3AED] via-[#2563EB] to-[#00E5FF] text-white font-semibold text-sm"
+                  disabled={!isStepValid()}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#7C3AED] via-[#2563EB] to-[#00E5FF] text-white font-semibold text-sm disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   Continue <ChevronRight className="w-4 h-4" />
                 </button>
               ) : (
                 <button
                   onClick={handleSubmit}
-                  disabled={loading}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#7C3AED] via-[#2563EB] to-[#00E5FF] text-white font-semibold text-sm disabled:opacity-70"
+                  disabled={loading || !isStepValid()}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#7C3AED] via-[#2563EB] to-[#00E5FF] text-white font-semibold text-sm disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   {loading ? "Submitting..." : "Submit Plan"}
                 </button>

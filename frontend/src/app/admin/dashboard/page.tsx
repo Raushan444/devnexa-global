@@ -1,9 +1,8 @@
 "use client";
 import { API_BASE_URL } from "@/config/api";
-
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Shield, BookOpen, Calendar, Users, LogOut, CheckCircle, Clock, Trash2, Plus, RefreshCw, BarChart2, DollarSign, XCircle, TrendingUp, Kanban, FileText, Download } from "lucide-react";
+import { Shield, BookOpen, Calendar, Users, LogOut, CheckCircle, Clock, Trash2, Plus, RefreshCw, BarChart2, DollarSign, XCircle, TrendingUp, Kanban, FileText, Download, Mail } from "lucide-react";
 
 interface Analytics {
   totalUsers: number;
@@ -43,6 +42,26 @@ interface UserAccount {
   oauthProvider: string;
 }
 
+interface Subscriber {
+  id: number;
+  email: string;
+  name: string;
+  confirmed: boolean;
+  createdAt: string;
+}
+
+interface Lead {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  source: string;
+  status: "NEW" | "CONTACTED" | "QUALIFIED" | "PROPOSAL" | "WON" | "LOST";
+  notes: string;
+  estimatedValue?: number;
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
   const [admin, setAdmin] = useState<any>(null);
@@ -53,6 +72,8 @@ export default function AdminDashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [users, setUsers] = useState<UserAccount[]>([]);
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [crmLeads, setCrmLeads] = useState<Lead[]>([]);
   const [auditLogs, setAuditLogs] = useState<Array<{ id: number; action: string; performedBy: string; timestamp: string; details: string }>>([]);
 
   // Mock revenue data
@@ -71,24 +92,6 @@ export default function AdminDashboard() {
     { month: 'Dec', revenue: 72000 },
   ];
   const maxRevenue = Math.max(...revenueData.map(d => d.revenue));
-
-  // Mock CRM leads
-  const crmLeads: Record<string, Array<{ name: string; company: string; value: string }>> = {
-    NEW: [
-      { name: 'Jordan Lee', company: 'TechVentures Inc.', value: '$25,000' },
-      { name: 'Mia Chen', company: 'HealthFlow AI', value: '$40,000' },
-    ],
-    CONTACTED: [
-      { name: 'Ryan Park', company: 'FinEdge Capital', value: '$18,000' },
-    ],
-    QUALIFIED: [
-      { name: 'Aisha Kumar', company: 'EduScale Global', value: '$55,000' },
-      { name: 'Tom Brandt', company: 'LogiCorp Ltd.', value: '$30,000' },
-    ],
-    WON: [
-      { name: 'Sara Novak', company: 'MediConnect Plc', value: '$45,000' },
-    ],
-  };
 
   // Create Blog state modal
   const [showBlogModal, setShowBlogModal] = useState(false);
@@ -128,11 +131,13 @@ export default function AdminDashboard() {
       const headers = { Authorization: `Bearer ${token}` };
 
       // Fetch admin databases
-      const [resAnal, resAppt, resBlog, resUser] = await Promise.all([
+      const [resAnal, resAppt, resBlog, resUser, resSub, resLeads] = await Promise.all([
         fetch(`${API_BASE_URL}/api/admin/analytics`, { headers }),
         fetch(`${API_BASE_URL}/api/admin/appointments`, { headers }),
         fetch(`${API_BASE_URL}/api/admin/blogs`, { headers }),
-        fetch(`${API_BASE_URL}/api/admin/users`, { headers })
+        fetch(`${API_BASE_URL}/api/admin/users`, { headers }),
+        fetch(`${API_BASE_URL}/api/admin/newsletter/subscribers`, { headers }),
+        fetch(`${API_BASE_URL}/api/admin/crm/leads`, { headers })
       ]);
 
       // Fetch audit logs (non-blocking)
@@ -149,11 +154,13 @@ export default function AdminDashboard() {
         return;
       }
 
-      if (resAnal.ok && resAppt.ok && resBlog.ok && resUser.ok) {
+      if (resAnal.ok && resAppt.ok && resBlog.ok && resUser.ok && resSub.ok && resLeads.ok) {
         setAnalytics(await resAnal.json());
         setAppointments(await resAppt.json());
         setBlogs(await resBlog.json());
         setUsers(await resUser.json());
+        setSubscribers(await resSub.json());
+        setCrmLeads(await resLeads.json());
       } else {
         setErrorMsg("Failed to read administrative datasets. API response check failed.");
       }
@@ -184,6 +191,49 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       console.error("Failed to update appointment status.");
+    }
+  };
+
+  const handleUpdateLeadStatus = async (id: number, status: string) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/crm/leads/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ status })
+      });
+
+      if (response.ok) {
+        const updated = await response.json();
+        setCrmLeads((prev) => prev.map((l) => (l.id === id ? updated : l)));
+      }
+    } catch (err) {
+      console.error("Failed to update lead status.");
+    }
+  };
+
+  const handleDeleteSubscriber = async (id: number) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    if (!confirm("Are you sure you want to delete this subscriber?")) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/newsletter/subscribers/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        setSubscribers((prev) => prev.filter((s) => s.id !== id));
+      }
+    } catch (err) {
+      console.error("Failed to delete subscriber.");
     }
   };
 
@@ -244,6 +294,12 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDownloadCsv = () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    window.open(`${API_BASE_URL}/api/admin/newsletter/subscribers/export?access_token=${token}`, "_blank");
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -299,6 +355,7 @@ export default function AdminDashboard() {
           {[
             { id: "analytics", name: "Analytics Metrics", icon: <BarChart2 className="w-4 h-4" /> },
             { id: "appointments", name: "Appointments & Bookings", icon: <Calendar className="w-4 h-4" /> },
+            { id: "subscribers", name: "Newsletter Subscribers", icon: <Mail className="w-4 h-4" /> },
             { id: "blogs", name: "Insights CMS", icon: <BookOpen className="w-4 h-4" /> },
             { id: "users", name: "Users & Clients", icon: <Users className="w-4 h-4" /> },
             { id: "revenue", name: "Revenue Analytics", icon: <TrendingUp className="w-4 h-4" /> },
@@ -358,23 +415,18 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Appointments Count */}
-              <div className="glass-card p-6 border border-white/5 flex justify-between items-center">
-                <div>
-                  <h4 className="font-grotesk font-bold text-sm text-white">Consultations Requests</h4>
-                  <p className="font-sans text-xs text-slate-500 mt-1">Total scheduled meetings booked by potential clients.</p>
-                </div>
-                <span className="font-jakarta text-4xl font-extrabold text-white">{analytics.totalAppointments}</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-sans text-xs">
+              <div className="glass-card p-6 border border-white/5 text-center space-y-2">
+                <span className="text-[10px] text-slate-500 uppercase">Newsletter Subscribers</span>
+                <div className="text-3xl font-bold text-white">{subscribers.length}</div>
               </div>
-
-              {/* Blog posts count */}
-              <div className="glass-card p-6 border border-white/5 flex justify-between items-center">
-                <div>
-                  <h4 className="font-grotesk font-bold text-sm text-white">Published CMS Articles</h4>
-                  <p className="font-sans text-xs text-slate-500 mt-1">Insights, tech guides, and architectural designs posted.</p>
-                </div>
-                <span className="font-jakarta text-4xl font-extrabold text-white">{analytics.totalBlogs}</span>
+              <div className="glass-card p-6 border border-white/5 text-center space-y-2">
+                <span className="text-[10px] text-slate-500 uppercase">Consultations Requests</span>
+                <div className="text-3xl font-bold text-white">{appointments.length}</div>
+              </div>
+              <div className="glass-card p-6 border border-white/5 text-center space-y-2">
+                <span className="text-[10px] text-slate-500 uppercase">Total Pipeline Leads</span>
+                <div className="text-3xl font-bold text-white">{crmLeads.length}</div>
               </div>
             </div>
           </div>
@@ -409,7 +461,7 @@ export default function AdminDashboard() {
                         <td className="p-4">{appt.scheduledTime.replace("T", " ")}</td>
                         <td className="p-4">
                           <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-semibold ${
-                            appt.status === "APPROVED"
+                            appt.status === "APPROVED" || appt.status === "CONFIRMED"
                               ? "bg-green-500/10 text-green-400"
                               : appt.status === "PENDING"
                               ? "bg-amber-500/10 text-amber-400"
@@ -422,7 +474,7 @@ export default function AdminDashboard() {
                           {appt.status === "PENDING" && (
                             <>
                               <button
-                                onClick={() => handleUpdateAppointmentStatus(appt.id, "APPROVED")}
+                                onClick={() => handleUpdateAppointmentStatus(appt.id, "CONFIRMED")}
                                 className="px-3 py-1 rounded bg-green-500/20 text-green-400 hover:bg-green-500 hover:text-white transition-all text-[10px] font-bold"
                               >
                                 Approve
@@ -443,6 +495,56 @@ export default function AdminDashboard() {
               </div>
             ) : (
               <div className="text-center py-12 text-slate-500">No appointments submitted yet.</div>
+            )}
+          </div>
+        )}
+
+        {/* Subscribers tab */}
+        {activeTab === "subscribers" && (
+          <div className="space-y-8 font-sans text-xs">
+            <div className="flex justify-between items-center">
+              <h3 className="font-grotesk text-xl font-bold text-white">Newsletter Subscriber Registry</h3>
+              <button
+                onClick={handleDownloadCsv}
+                className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all text-xs font-semibold flex items-center gap-1.5"
+              >
+                <Download className="w-4 h-4" />
+                Export CSV
+              </button>
+            </div>
+
+            {subscribers.length > 0 ? (
+              <div className="glass-card border border-white/10 overflow-hidden">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-white/5 font-grotesk text-[10px] uppercase tracking-wider text-slate-500 border-b border-white/5">
+                      <th className="p-4 pl-6">Name</th>
+                      <th className="p-4">Email</th>
+                      <th className="p-4">Subscription Date</th>
+                      <th className="p-4 pr-6 text-right">Delete Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 text-slate-300">
+                    {subscribers.map((sub) => (
+                      <tr key={sub.id} className="hover:bg-white/5 transition-colors">
+                        <td className="p-4 pl-6 font-bold text-white">{sub.name}</td>
+                        <td className="p-4">{sub.email}</td>
+                        <td className="p-4 text-slate-500">{sub.createdAt ? sub.createdAt.split("T")[0] : "N/A"}</td>
+                        <td className="p-4 pr-6 text-right">
+                          <button
+                            onClick={() => handleDeleteSubscriber(sub.id)}
+                            className="p-2 text-slate-500 hover:text-red-400 transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-12 text-slate-500">No subscribers found.</div>
             )}
           </div>
         )}
@@ -603,29 +705,58 @@ export default function AdminDashboard() {
 
         {/* CRM Leads tab */}
         {activeTab === "crm" && (
-          <div className="space-y-8">
-            <h3 className="font-grotesk text-xl font-bold text-white">CRM Pipeline</h3>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              {(['NEW', 'CONTACTED', 'QUALIFIED', 'WON'] as const).map((stage) => (
-                <div key={stage} className="space-y-4">
-                  <div className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider text-center ${
-                    stage === 'WON' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                    : stage === 'QUALIFIED' ? 'bg-blue-500/10 text-[#00E5FF] border border-blue-500/20'
-                    : stage === 'CONTACTED' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                    : 'bg-white/5 text-slate-400 border border-white/10'
-                  }`}>
-                    {stage} · {crmLeads[stage].length}
-                  </div>
-                  {crmLeads[stage].map((lead, idx) => (
-                    <div key={idx} className="glass-card border border-white/5 p-4 hover:border-white/10 transition-all">
-                      <div className="font-grotesk font-bold text-sm text-white mb-1">{lead.name}</div>
-                      <div className="text-xs text-slate-500 mb-2">{lead.company}</div>
-                      <div className="text-sm font-bold text-emerald-400">{lead.value}</div>
+          <div className="space-y-8 font-sans text-xs">
+            <h3 className="font-grotesk text-xl font-bold text-white">CRM Pipeline & Scope Submissions</h3>
+            {crmLeads.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {(["NEW", "CONTACTED", "QUALIFIED"] as const).map((stage) => {
+                  const stageLeads = crmLeads.filter(l => l.status === stage);
+                  return (
+                    <div key={stage} className="space-y-4">
+                      <div className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider text-center bg-white/5 border border-white/10 text-slate-400">
+                        {stage} · {stageLeads.length}
+                      </div>
+                      <div className="space-y-3">
+                        {stageLeads.map((lead) => (
+                          <div key={lead.id} className="glass-card border border-white/5 p-4 space-y-3">
+                            <div>
+                              <div className="font-grotesk font-bold text-sm text-white">{lead.name}</div>
+                              <div className="text-[10px] text-slate-500">{lead.company} | {lead.email}</div>
+                              {lead.phone && <div className="text-[9px] text-slate-600">{lead.phone}</div>}
+                            </div>
+                            {lead.notes && (
+                              <div className="p-2 bg-black/40 border border-white/5 rounded text-[10px] text-slate-400 font-mono whitespace-pre-wrap max-h-24 overflow-y-auto">
+                                {lead.notes}
+                              </div>
+                            )}
+                            <div className="flex gap-1.5 pt-2 border-t border-white/5">
+                              {stage === "NEW" && (
+                                <button
+                                  onClick={() => handleUpdateLeadStatus(lead.id, "CONTACTED")}
+                                  className="w-full py-1 rounded bg-[#00E5FF]/10 text-[#00E5FF] hover:bg-[#00E5FF] hover:text-[#070B16] font-bold text-[9px] transition-all"
+                                >
+                                  Mark Contacted
+                                </button>
+                              )}
+                              {stage === "CONTACTED" && (
+                                <button
+                                  onClick={() => handleUpdateLeadStatus(lead.id, "QUALIFIED")}
+                                  className="w-full py-1 rounded bg-green-500/10 text-green-400 hover:bg-green-500 hover:text-white font-bold text-[9px] transition-all"
+                                >
+                                  Mark Qualified
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  ))}
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-slate-500">No CRM leads found.</div>
+            )}
           </div>
         )}
 

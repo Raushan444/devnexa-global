@@ -91,7 +91,10 @@ export default function CostEstimator() {
   const isLastStep = currentStep === steps.length - 1;
   const isOnSummary = currentStep === steps.length;
 
+  const isSelectionValid = step ? (step.type === "range" || selections[step.id] !== undefined) : true;
+
   const goNext = () => {
+    if (!isSelectionValid) return;
     setDirection(1);
     setCurrentStep(prev => Math.min(prev + 1, steps.length));
   };
@@ -241,7 +244,8 @@ export default function CostEstimator() {
                     </button>
                     <button
                       onClick={goNext}
-                      className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#7C3AED] via-[#2563EB] to-[#00E5FF] text-white font-semibold text-sm hover:shadow-lg hover:shadow-cyan-500/20 transition-all"
+                      disabled={!isSelectionValid}
+                      className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#7C3AED] via-[#2563EB] to-[#00E5FF] text-white font-semibold text-sm hover:shadow-lg hover:shadow-cyan-500/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                     >
                       {isLastStep ? "View Summary" : "Next"} <ChevronRight className="w-4 h-4" />
                     </button>

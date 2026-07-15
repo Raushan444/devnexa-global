@@ -33,6 +33,7 @@ com\devnexa\global\DevNexaApplication.class
 com\devnexa\global\modules\admin\AdminController.class
 com\devnexa\global\modules\auth\CustomUserDetailsService.class
 com\devnexa\global\modules\booking\Booking$BookingStatus.class
+com\devnexa\global\modules\crm\CrmController$AuditRequest.class
 com\devnexa\global\modules\auth\JwtAuthenticationEntryPoint.class
 com\devnexa\global\modules\crm\CrmController.class
 com\devnexa\global\modules\admin\AuditLog.class

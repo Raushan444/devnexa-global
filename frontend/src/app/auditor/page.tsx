@@ -1,8 +1,8 @@
 "use client";
 import { API_BASE_URL } from "@/config/api";
-
 import React, { useState } from "react";
 import { Sparkles, Globe, ShieldAlert, CheckCircle, RefreshCw } from "lucide-react";
+import AuditWidget from "@/components/AuditWidget";
 
 export default function WebsiteAuditor() {
   const [url, setUrl] = useState("");
@@ -87,6 +87,11 @@ export default function WebsiteAuditor() {
           {errorMsg && (
             <p className="text-red-400 text-xs mt-4 text-center">{errorMsg}</p>
           )}
+        </div>
+
+        {/* Dynamic Performance Scoping Audit Widget */}
+        <div className="max-w-2xl mx-auto mb-16">
+          <AuditWidget />
         </div>
 
         {/* Result view */}
