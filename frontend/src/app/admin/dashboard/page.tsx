@@ -130,40 +130,53 @@ export default function AdminDashboard() {
     try {
       const headers = { Authorization: `Bearer ${token}` };
 
-      // Fetch admin databases
-      const [resAnal, resAppt, resBlog, resUser, resSub, resLeads] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/admin/analytics`, { headers }),
-        fetch(`${API_BASE_URL}/api/admin/appointments`, { headers }),
-        fetch(`${API_BASE_URL}/api/admin/blogs`, { headers }),
-        fetch(`${API_BASE_URL}/api/admin/users`, { headers }),
-        fetch(`${API_BASE_URL}/api/admin/newsletter/subscribers`, { headers }),
-        fetch(`${API_BASE_URL}/api/admin/crm/leads`, { headers })
-      ]);
+      // Helper to fetch single endpoint safely
+      const fetchSafely = async (url: string, fallback: any) => {
+        try {
+          const res = await fetch(url, { headers });
+          if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            router.push("/admin");
+            return null;
+          }
+          if (res.ok) {
+            return await res.json();
+          }
+        } catch (e) {
+          console.warn("Failed to fetch: " + url, e);
+        }
+        return fallback;
+      };
 
-      // Fetch audit logs (non-blocking)
-      fetch(`${API_BASE_URL}/api/admin/audit-logs`, { headers })
-        .then(r => r.ok ? r.json() : [])
-        .then(data => setAuditLogs(data))
-        .catch(() => {});
+      // Load analytics (core metrics)
+      const analyticsData = await fetchSafely(`${API_BASE_URL}/api/admin/analytics`, null);
+      if (analyticsData) setAnalytics(analyticsData);
 
-      if (resAnal.status === 401 || resAppt.status === 401 || resBlog.status === 401 || resUser.status === 401 ||
-          resAnal.status === 403 || resAppt.status === 403 || resBlog.status === 403 || resUser.status === 403) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        router.push("/admin");
-        return;
-      }
+      // Load appointments
+      const apptsData = await fetchSafely(`${API_BASE_URL}/api/admin/appointments`, []);
+      if (apptsData) setAppointments(apptsData);
 
-      if (resAnal.ok && resAppt.ok && resBlog.ok && resUser.ok && resSub.ok && resLeads.ok) {
-        setAnalytics(await resAnal.json());
-        setAppointments(await resAppt.json());
-        setBlogs(await resBlog.json());
-        setUsers(await resUser.json());
-        setSubscribers(await resSub.json());
-        setCrmLeads(await resLeads.json());
-      } else {
-        setErrorMsg("Failed to read administrative datasets. API response check failed.");
-      }
+      // Load blogs
+      const blogsData = await fetchSafely(`${API_BASE_URL}/api/admin/blogs`, []);
+      if (blogsData) setBlogs(blogsData);
+
+      // Load users
+      const usersData = await fetchSafely(`${API_BASE_URL}/api/admin/users`, []);
+      if (usersData) setUsers(usersData);
+
+      // Load subscribers
+      const subData = await fetchSafely(`${API_BASE_URL}/api/admin/newsletter/subscribers`, []);
+      if (subData) setSubscribers(subData);
+
+      // Load CRM leads
+      const leadsData = await fetchSafely(`${API_BASE_URL}/api/admin/crm/leads`, []);
+      if (leadsData) setCrmLeads(leadsData);
+
+      // Load audit logs (non-blocking)
+      const auditData = await fetchSafely(`${API_BASE_URL}/api/admin/audit-logs`, []);
+      if (auditData) setAuditLogs(auditData);
+
     } catch (e) {
       setErrorMsg(`Failed to connect to backend server. Make sure Spring Boot (${API_BASE_URL}) is running!`);
     } finally {
