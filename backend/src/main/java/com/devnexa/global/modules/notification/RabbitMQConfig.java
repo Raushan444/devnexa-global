@@ -7,9 +7,14 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.Import;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration;
 
 @Configuration
 @Profile("!local-h2")
+@Import(RabbitAutoConfiguration.class)
+@ConditionalOnProperty(name = "app.rabbitmq.enabled", havingValue = "true")
 public class RabbitMQConfig {
 
     public static final String DEV_EXCHANGE = "devnexa.exchange";
