@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Bot, Cpu } from "lucide-react";
+import Logo from "@/components/Logo";
 
 interface LoadingScreenProps {
   onComplete: () => void;
@@ -79,25 +80,16 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
               className="absolute w-40 h-40 border border-dashed border-[#00e5ff]/10 rounded-full"
             />
 
-            {/* Glowing morph logo */}
+            {/* Glowing exact logo icon */}
             <motion.div
               animate={{
-                scale: [1, 1.08, 1],
-                borderRadius: ["35%", "50%", "35%"]
+                scale: [0.95, 1.05, 0.95],
               }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="w-20 h-20 bg-gradient-to-tr from-[#7c3aed] via-[#2563eb] to-[#00e5ff] shadow-[0_0_60px_rgba(0,229,255,0.35)] flex items-center justify-center relative overflow-hidden"
+              className="w-24 h-24 flex items-center justify-center relative"
             >
-              {/* Logo emission pulse */}
-              <motion.div
-                animate={{
-                  opacity: [0.3, 0.8, 0.3],
-                  scale: [1, 1.2, 1]
-                }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.4)_0%,transparent_60%)]"
-              />
-              <span className="font-mono text-3xl font-extrabold text-white tracking-widest relative z-10">DN</span>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,229,255,0.25)_0%,transparent_70%)] blur-md pointer-events-none" />
+              <Logo iconOnly={true} className="scale-[1.3] relative z-10" />
             </motion.div>
 
             {/* Circular Progress Overlay */}
