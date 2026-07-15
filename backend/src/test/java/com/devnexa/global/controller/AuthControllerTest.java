@@ -1,7 +1,7 @@
 package com.devnexa.global.controller;
 
-import com.devnexa.global.dto.LoginRequest;
-import com.devnexa.global.dto.SignupRequest;
+import com.devnexa.global.modules.auth.LoginRequest;
+import com.devnexa.global.modules.auth.SignupRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
