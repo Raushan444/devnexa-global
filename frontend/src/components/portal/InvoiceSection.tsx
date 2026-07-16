@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "@/config/api";
 import { DollarSign, FileText, CheckCircle2, AlertCircle, Printer, CreditCard } from "lucide-react";
 
@@ -22,6 +22,14 @@ export default function InvoiceSection({ invoices, onRefresh }: InvoiceSectionPr
   const [loadingInvoiceId, setLoadingInvoiceId] = useState<number | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    // Inject Razorpay checkout script dynamically
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
 
   const handlePrint = (invoice: Invoice) => {
     const printWindow = window.open("", "_blank");
@@ -286,49 +294,119 @@ export default function InvoiceSection({ invoices, onRefresh }: InvoiceSectionPr
     printWindow.document.close();
   };
 
-  const handleCheckout = async (invoice: Invoice) => {
+  const handleCheckout = async (invoice: Invoice, provider: 'stripe' | 'razorpay' = 'stripe') => {
     setLoadingInvoiceId(invoice.id);
     setErrorMsg("");
     setPaymentSuccess(false);
 
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoadingInvoiceId(null);
+      return;
+    }
 
-      const res = await fetch(`${API_BASE_URL}/api/payments/create-intent`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ invoiceId: invoice.id })
-      });
+    if (provider === 'stripe') {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/payments/create-intent`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ invoiceId: invoice.id })
+        });
 
-      const data = await res.json();
-      if (res.ok) {
-        // If clientSecret is mock, simulate mock completion for sandbox testing
-        if (data.clientSecret && data.clientSecret.includes("mock")) {
-          // Trigger a fake succeed simulation call or alert
-          setTimeout(() => {
+        const data = await res.json();
+        if (res.ok) {
+          if (data.clientSecret && data.clientSecret.includes("mock")) {
+            setTimeout(() => {
+              setPaymentSuccess(true);
+              setLoadingInvoiceId(null);
+              onRefresh();
+            }, 1500);
+          } else {
+            alert("Stripe keys not fully configured. Simulating mock payment succeeded.");
             setPaymentSuccess(true);
             setLoadingInvoiceId(null);
-            // Simulate webhook status updates locally by hitting state
             onRefresh();
-          }, 1500);
+          }
         } else {
-          // Open mock checkout page or stripe checkout
-          alert("Stripe keys not fully configured. Simulating mock payment succeeded.");
-          setPaymentSuccess(true);
+          setErrorMsg("Failed to initiate Stripe payment gateway intent.");
           setLoadingInvoiceId(null);
-          onRefresh();
         }
-      } else {
-        setErrorMsg("Failed to initiate payment gateway intent.");
+      } catch (err) {
+        setErrorMsg("Gateway error. Make sure backend Spring Boot is online.");
         setLoadingInvoiceId(null);
       }
-    } catch (err) {
-      setErrorMsg("Gateway error. Make sure backend Spring Boot is online.");
-      setLoadingInvoiceId(null);
+    } else {
+      // Razorpay checkout flow
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/payments/razorpay/create-order`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ invoiceId: invoice.id })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.orderId) {
+          const options = {
+            key: data.keyId || "rzp_test_mockkey", // Production API key passed down from properties
+            amount: data.amount,
+            currency: data.currency || "INR",
+            name: "DevNexa Global",
+            description: `Payment for Invoice #${invoice.invoiceNumber}`,
+            order_id: data.orderId,
+            handler: async function (response: any) {
+              setLoadingInvoiceId(invoice.id);
+              try {
+                const verifyRes = await fetch(`${API_BASE_URL}/api/payments/razorpay/verify`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                  },
+                  body: JSON.stringify({
+                    orderId: response.razorpay_order_id,
+                    paymentId: response.razorpay_payment_id,
+                    signature: response.razorpay_signature
+                  })
+                });
+                const verifyData = await verifyRes.json();
+                if (verifyRes.ok && verifyData.success) {
+                  setPaymentSuccess(true);
+                  onRefresh();
+                } else {
+                  setErrorMsg(verifyData.message || "Razorpay signature verification failed.");
+                }
+              } catch (e) {
+                setErrorMsg("Error communicating with payment verification endpoint.");
+              } finally {
+                setLoadingInvoiceId(null);
+              }
+            },
+            prefill: {
+              name: "Client Account",
+              email: "client@devnexa.global"
+            },
+            theme: {
+              color: "#7C3AED"
+            }
+          };
+
+          const rzp = new (window as any).Razorpay(options);
+          rzp.open();
+          setLoadingInvoiceId(null);
+        } else {
+          setErrorMsg(data.message || "Failed to generate Razorpay order. Ensure Razorpay is configured on backend.");
+          setLoadingInvoiceId(null);
+        }
+      } catch (err) {
+        setErrorMsg("Razorpay order creation failed. Make sure backend is running.");
+        setLoadingInvoiceId(null);
+      }
     }
   };
 
@@ -396,14 +474,24 @@ export default function InvoiceSection({ invoices, onRefresh }: InvoiceSectionPr
                 </button>
 
                 {inv.status !== "PAID" && (
-                  <button
-                    onClick={() => handleCheckout(inv)}
-                    disabled={loadingInvoiceId === inv.id}
-                    className="py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#2563EB] text-xs font-bold text-white shadow-lg flex items-center gap-2 cursor-pointer hover:scale-[1.01] transition-all disabled:opacity-50"
-                  >
-                    <CreditCard className="w-4 h-4" />
-                    {loadingInvoiceId === inv.id ? "Processing..." : "Pay Now"}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleCheckout(inv, 'stripe')}
+                      disabled={loadingInvoiceId === inv.id}
+                      className="py-2 px-3 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-[10px] font-bold text-white flex items-center gap-1 cursor-pointer hover:scale-[1.01] transition-all disabled:opacity-50"
+                    >
+                      <CreditCard className="w-3 h-3" />
+                      Stripe
+                    </button>
+                    <button
+                      onClick={() => handleCheckout(inv, 'razorpay')}
+                      disabled={loadingInvoiceId === inv.id}
+                      className="py-2 px-3 rounded-lg bg-gradient-to-r from-[#00E5FF] to-[#2563EB] text-[10px] font-bold text-white flex items-center gap-1 cursor-pointer hover:scale-[1.01] transition-all disabled:opacity-50"
+                    >
+                      <CreditCard className="w-3 h-3" />
+                      Razorpay
+                    </button>
+                  </div>
                 )}
               </div>
             </div>

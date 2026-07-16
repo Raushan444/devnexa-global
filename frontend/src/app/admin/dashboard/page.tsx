@@ -3,6 +3,7 @@ import { API_BASE_URL } from "@/config/api";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Shield, BookOpen, Calendar, Users, LogOut, CheckCircle, Clock, Trash2, Plus, RefreshCw, BarChart2, DollarSign, XCircle, TrendingUp, Kanban, FileText, Download, Mail } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Analytics {
   totalUsers: number;
@@ -390,9 +391,18 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {/* Analytics tab */}
-        {activeTab === "analytics" && (
-          <div className="space-y-8">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.25 }}
+            className="space-y-8"
+          >
+            {/* Analytics tab */}
+            {activeTab === "analytics" && (
+              <div className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {/* Total Users */}
               <div className="glass-card p-6 border border-white/5 flex items-center justify-between">
@@ -808,6 +818,8 @@ export default function AdminDashboard() {
             )}
           </div>
         )}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Publish Blog Modal */}

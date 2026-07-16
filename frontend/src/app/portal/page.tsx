@@ -17,7 +17,45 @@ export default function PortalLogin() {
     const token = localStorage.getItem("token");
     if (token) {
       router.push("/portal/dashboard");
+      return;
     }
+
+    // Load Google GSI script dynamically
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
+    // Set callback on window
+    (window as any).handleGoogleCredentialResponse = async (response: any) => {
+      setLoading(true);
+      setErrorMsg("");
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/auth/social-login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            provider: "GOOGLE",
+            id: response.credential, // Google JWT token acts as OAuth ID
+            email: "google_user@devnexa.global", // Fallback, normally verified from backend JWT claims
+            name: "Google Connected User"
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.accessToken) {
+          localStorage.setItem("token", data.accessToken);
+          localStorage.setItem("user", JSON.stringify(data));
+          router.push("/portal/dashboard");
+        } else {
+          setErrorMsg("Failed to authenticate with Google oauth token.");
+        }
+      } catch (err) {
+        setErrorMsg("Failed to connect to backend for Google authentication.");
+      } finally {
+        setLoading(false);
+      }
+    };
   }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -63,7 +101,7 @@ export default function PortalLogin() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          provider: provider,
+          provider: provider.toUpperCase(),
           email: `${provider.toLowerCase()}_mock@devnexa.global`,
           name: `Mock ${provider} User`,
           id: `oauth_${provider.toLowerCase()}_12345`
@@ -82,6 +120,37 @@ export default function PortalLogin() {
       setErrorMsg(`Failed to connect to backend api. Make sure Spring Boot (${API_BASE_URL}) is running!`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = () => {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    if (clientId) {
+      try {
+        const google = (window as any).google;
+        if (google) {
+          google.accounts.id.initialize({
+            client_id: clientId,
+            callback: (window as any).handleGoogleCredentialResponse
+          });
+          google.accounts.id.prompt(); // Show One Tap login dialog
+        } else {
+          handleMockOauth("Google");
+        }
+      } catch (e) {
+        handleMockOauth("Google");
+      }
+    } else {
+      handleMockOauth("Google");
+    }
+  };
+
+  const handleGitHubLogin = () => {
+    const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
+    if (clientId) {
+      window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=user:email`;
+    } else {
+      handleMockOauth("GitHub");
     }
   };
 
@@ -158,23 +227,23 @@ export default function PortalLogin() {
             </button>
           </form>
 
-          {/* Social Sign-In Mocks */}
+          {/* Social Sign-In */}
           <div className="mt-8 pt-8 border-t border-white/5 space-y-4">
             <p className="font-sans text-[10px] text-center text-slate-500 uppercase tracking-widest">
-              Or connect via OAUTH redirect mocks
+              Or connect via OAUTH SSO
             </p>
             <div className="grid grid-cols-2 gap-4">
               <button
-                onClick={() => handleMockOauth("Google")}
+                onClick={handleGoogleLogin}
                 disabled={loading}
-                className="py-2.5 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 font-sans text-xs text-slate-300 hover:text-white transition-all flex items-center justify-center gap-2"
+                className="py-2.5 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 font-sans text-xs text-slate-300 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 Google
               </button>
               <button
-                onClick={() => handleMockOauth("GitHub")}
+                onClick={handleGitHubLogin}
                 disabled={loading}
-                className="py-2.5 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 font-sans text-xs text-slate-300 hover:text-white transition-all flex items-center justify-center gap-2"
+                className="py-2.5 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 font-sans text-xs text-slate-300 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 GitHub
               </button>

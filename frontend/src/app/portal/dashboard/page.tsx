@@ -7,6 +7,7 @@ import { LayoutDashboard, FileText, HelpCircle, LogOut, CheckCircle, Clock, Aler
 import KanbanBoard from "@/components/portal/KanbanBoard";
 import FileExplorer from "@/components/portal/FileExplorer";
 import InvoiceSection from "@/components/portal/InvoiceSection";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Project {
   id: number;
@@ -380,9 +381,18 @@ export default function ClientDashboard() {
           ))}
         </div>
 
-        {/* Overview Tab Content */}
-        {activeTab === "overview" && (
-          <div className="space-y-8">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.25 }}
+            className="space-y-8"
+          >
+            {/* Overview Tab Content */}
+            {activeTab === "overview" && (
+              <div className="space-y-8">
             {selectedProjectId ? (
               (() => {
                 const proj = projects.find((p) => p.id === selectedProjectId);
@@ -690,6 +700,8 @@ export default function ClientDashboard() {
             </div>
           </div>
         )}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* New Ticket Modal */}
