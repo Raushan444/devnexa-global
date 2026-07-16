@@ -53,7 +53,10 @@ export default function BookingPage() {
           const data = await res.json();
           // Map to Slot interface
           if (data && data.length > 0) {
-            setSlots(data.map((s: any) => ({ time: s.startTime, available: s.isAvailable })));
+            setSlots(data.map((s: any) => ({
+              time: s.startTime,
+              available: s.isAvailable !== undefined ? s.isAvailable : (s.available !== undefined ? s.available : true)
+            })));
           } else {
             setSlots(getDefaultSlots());
           }
