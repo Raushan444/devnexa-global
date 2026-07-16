@@ -137,7 +137,7 @@ public class WebSecurityConfig {
         if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
             configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
         } else {
-            configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://devnexa.global"));
+            configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://127.0.0.1:3000", "https://devnexa.global"));
         }
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control", "Accept", "Origin", "X-Requested-With"));

@@ -114,7 +114,7 @@ export default function PortalLogin() {
         localStorage.setItem("user", JSON.stringify(data));
         router.push("/portal/dashboard");
       } else {
-        setErrorMsg("Failed to complete social login redirect mock.");
+        setErrorMsg(data.message || "Failed to complete social login redirect mock.");
       }
     } catch (err) {
       setErrorMsg(`Failed to connect to backend api. Make sure Spring Boot (${API_BASE_URL}) is running!`);

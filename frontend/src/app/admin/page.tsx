@@ -130,7 +130,7 @@ export default function AdminLogin() {
           setErrorMsg("Access Denied! Mock OAuth user is not registered as Admin.");
         }
       } else {
-        setErrorMsg("Failed to complete Admin social login simulation.");
+        setErrorMsg(data.message || "Failed to complete Admin social login simulation.");
       }
     } catch (err) {
       setErrorMsg(`Failed to connect to backend api. Make sure Spring Boot (${API_BASE_URL}) is running!`);
