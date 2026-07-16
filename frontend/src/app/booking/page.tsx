@@ -43,7 +43,10 @@ export default function BookingPage() {
     const fetchSlots = async () => {
       setLoadingSlots(true);
       setErrorMsg("");
-      const formattedDate = selectedDate.toISOString().split("T")[0];
+      const yyyy = selectedDate.getFullYear();
+      const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const dd = String(selectedDate.getDate()).padStart(2, '0');
+      const formattedDate = `${yyyy}-${mm}-${dd}`;
       try {
         const res = await fetch(`${API_BASE_URL}/api/public/booking/slots?date=${formattedDate}`);
         if (res.ok) {
@@ -118,13 +121,18 @@ export default function BookingPage() {
     setSubmitting(true);
     setErrorMsg("");
 
+    const yyyy = selectedDate.getFullYear();
+    const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(selectedDate.getDate()).padStart(2, '0');
+    const formattedDate = `${yyyy}-${mm}-${dd}`;
+
     const payload = {
       clientName: name,
       clientEmail: email,
       clientCompany: company,
       phone: phone,
       meetingType: meetingType,
-      scheduledDate: selectedDate.toISOString().split("T")[0],
+      scheduledDate: formattedDate,
       scheduledTime: selectedSlot,
       timezone: timeZone,
       platform: platform,

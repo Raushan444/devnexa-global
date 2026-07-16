@@ -73,7 +73,7 @@ export default function AiChatbot() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ message: systemPrompt })
+        body: JSON.stringify({ message: messageText })
       });
 
       if (response.ok) {
