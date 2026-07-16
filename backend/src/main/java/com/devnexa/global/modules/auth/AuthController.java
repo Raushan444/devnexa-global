@@ -170,6 +170,24 @@ public class AuthController {
         return ResponseEntity.ok(new ApiResponse(true, "Email verified successfully! You can now log in."));
     }
 
+    @GetMapping("/debug-db")
+    public ResponseEntity<?> debugDb() {
+        Map<String, Object> status = new java.util.HashMap<>();
+        try {
+            status.put("userCount", userRepository.count());
+            status.put("users", userRepository.findAll().stream().map(u -> {
+                Map<String, Object> map = new java.util.HashMap<>();
+                map.put("username", u.getUsername());
+                map.put("email", u.getEmail());
+                map.put("roles", u.getRoles().stream().map(Role::name).toList());
+                return map;
+            }).toList());
+        } catch (Exception e) {
+            status.put("error", e.getMessage());
+        }
+        return ResponseEntity.ok(status);
+    }
+
     @PostMapping("/social-login")
     public ResponseEntity<?> socialLogin(@RequestBody Map<String, String> payload) {
         String provider = payload.get("provider"); // google or github
