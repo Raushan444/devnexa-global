@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { use } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MapPin, ArrowRight, ShieldCheck, Mail, Phone, Calendar } from "lucide-react";
@@ -56,8 +56,8 @@ const locationPages: Record<string, LocationData> = {
   }
 };
 
-export default function LocationLandingPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+export default function LocationLandingPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
   const loc = locationPages[slug];
 
   if (!loc) {

@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { use } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Shield, ArrowRight, CheckCircle2, Star, Target, Server } from "lucide-react";
@@ -71,8 +71,8 @@ const industryPages: Record<string, IndustryData> = {
   }
 };
 
-export default function IndustryLandingPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+export default function IndustryLandingPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
   const industry = industryPages[slug];
 
   if (!industry) {

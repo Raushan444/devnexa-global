@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { use } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, Cpu, Code, Database, Sparkles, CheckCircle2 } from "lucide-react";
@@ -96,8 +96,8 @@ const servicePages: Record<string, ServiceData> = {
   }
 };
 
-export default function ServiceLandingPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+export default function ServiceLandingPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
   const service = servicePages[slug];
 
   if (!service) {

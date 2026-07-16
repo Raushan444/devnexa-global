@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { use } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Clock, DollarSign, Sparkles, Shield, Cpu, ChevronRight, CheckCircle } from "lucide-react";
@@ -146,8 +146,8 @@ const caseStudies: Record<string, any> = {
   }
 };
 
-export default function CaseStudyPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+export default function CaseStudyPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
   const project = caseStudies[slug];
 
   if (!project) {
